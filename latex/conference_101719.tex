@@ -1,0 +1,584 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-nodecimaldot,es-tabla]{babel}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{url}
+\def\UrlBreaks{\do\/\do-}
+\usepackage{microtype}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,calc,backgrounds}
+
+\addto\captionsspanish{%
+  \renewcommand{\tablename}{Tabla}%
+  \renewcommand{\refname}{Referencias}%
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Detecci\'on de Deriva Arquitect\'onica en Sistemas Multi-Agente Basados en Modelos de Lenguaje mediante Chequeo de Conformidad sobre Trazas}
+
+\author{
+\IEEEauthorblockN{Leonardo Baca Calsin}
+\IEEEauthorblockA{\textit{Departamento de Ingenier\'ia de Sistemas e Inform\'atica} \\
+\textit{Universidad Nacional de San Agust\'in de Arequipa (UNSA)}\\
+Arequipa, Per\'u \\
+lbacac@unsa.edu.pe}
+\and
+\IEEEauthorblockN{German Arturo Chipana Jeronimo}
+\IEEEauthorblockA{\textit{Departamento de Ingenier\'ia de Sistemas e Inform\'atica} \\
+\textit{Universidad Nacional de San Agust\'in de Arequipa (UNSA)}\\
+Arequipa, Per\'u \\
+gchipanaj@unsa.edu.pe}
+}
+
+\maketitle
+
+\renewcommand\abstractname{Resumen}
+\begin{abstract}
+Los sistemas multi-agente (MAS) basados en modelos de lenguaje de gran escala (LLM) representan un cambio de paradigma en la construcci\'on de software, delegando la coordinaci\'on a redes de agentes con roles especializados. Sin embargo, a diferencia del software tradicional donde el control de flujo y los l\'imites modulares est\'an codificados r\'igidamente, los sistemas multi-agente exhiben deriva arquitect\'onica: la erosi\'on en tiempo de ejecuci\'on de los invariantes de dise\~no provocada por mutaciones de prompts, corrupci\'on y sobrescritura de memoria, e inversiones de precedencia operacional. En este art\'iculo formalizamos el espacio de comportamiento del agente mediante la tupla $B = \langle P, M, \Pi \rangle$, que modela cl\'ausulas de prompt versionadas criptogr\'aficamente, estados de memoria gobernados deterministamente y reglas de precedencia operacional. A partir de una s\'intesis sistem\'atica de 26 estudios de la literatura, derivamos una taxonom\'ia de nueve operadores de deriva arquitect\'onica y dise\~namos AgentArch, un marco de chequeo de conformidad sobre trazas basado en OpenTelemetry (agentarch.*). AgentArch opera como un monitor pasivo de tramos (SpanProcessor) que detecta y emite violaciones a una cola de auditor\'ia sin intervenci\'on activa. Evaluamos emp\'iricamente AgentArch sobre un corpus controlado de 50 escenarios en un sistema sint\'etico de soporte de pedidos frente a dos l\'ineas base de observabilidad y reglas de contorno. Los resultados demuestran una precisi\'on y exhaustividad del 100\% en modo guionizado con una sobrecarga temporal de $1.65\;\mu$s por tramo, superando ampliamente a las l\'ineas base.
+\end{abstract}
+
+\renewcommand\IEEEkeywordsname{Palabras clave}
+\begin{IEEEkeywords}
+Sistemas Multi-Agente, Modelos de Lenguaje de Gran Escala, Arquitectura de Software, Deriva Arquitect\'onica, Chequeo de Conformidad, Verificaci\'on en Tiempo de Ejecuci\'on, OpenTelemetry, Trazabilidad.
+\end{IEEEkeywords}
+
+\section{Introducci\'on}
+La transici\'on hacia el paradigma de desarrollo asistido por inteligencia artificial~\cite{wangj2026} est\'a redefiniendo la construcci\'on de software. En lugar de codificar r\'igidamente la l\'ogica de negocio en estructuras imperativas deterministas, los sistemas de software contempor\'aneos delegan crecientemente autonom\'ia a \textbf{sistemas multi-agente} (\emph{Multi-Agent Systems}, MAS) basados en \textbf{modelos de lenguaje de gran escala} (\emph{Large Language Models}, LLMs)~\cite{li2026, miranda2026}. En estas arquitecturas cognitivas y distribuidas, m\'ultiples agentes especializados (e.g., planificadores, ejecutores, analistas de triaje y \'arbitros de calidad) interact\'uan mediante protocolos de paso de mensajes, mantienen conocimiento en almacenes de memoria externa estructurada y ejecutan acciones sobre el entorno mediante interfaces de programaci\'on y \textbf{herramientas} (\emph{tools})~\cite{lu2023, liu2024, becattini2025b}.
+
+No obstante su versatilidad, los sistemas multi-agente basados en LLMs enfrentan un desaf\'io estructural fundamental de la ingenier\'ia de software: la \textbf{deriva arquitect\'onica} (\emph{architectural drift})~\cite{paduraru2026, deangelis2026}. En la ingenier\'ia de software cl\'asica, la deriva arquitect\'onica describe la erosi\'on o divergencia progresiva entre la arquitectura conceptual concebida en tiempo de dise\~no y la arquitectura realizada observable en tiempo de ejecuci\'on. En firmware embebido cr\'itico y determinista, De Angelis et al.~\cite{deangelis2026} demostraron recientemente que la deriva puede capturarse contrastando trazas de ejecuci\'on de instrucciones de hardware con diagramas de secuencia PlantUML, categorizando las discrepancias en diferencias discretas de ejecuci\'on (\textsc{Confirmed}, \textsc{Missing}, \textsc{Additional}, \textsc{Inverted}).
+
+Por el contrario, los sistemas multi-agente basados en LLMs operan en un r\'egimen cualitativamente distinto. Los agentes no ejecutan secuencias de m\'aquina deterministas; su comportamiento emerge de la inferencia estoc\'astica de modelos autorregresivos condicionados por directivas en lenguaje natural (\textbf{prompts}), estados mutables en memoria contextual y esquemas de herramientas~\cite{anand2026, wangj2026}. Como consecuencia, la deriva en MAS no se manifiesta como saltos an\'omalos en el contador de programa, sino en el espacio de comportamiento sem\'antico a trav\'es de tres vectores principales:
+\begin{enumerate}
+    \item \textbf{Deriva de Prompts ($P$):} Supresi\'on accidental de directivas de seguridad obligatorias, inyecci\'on de cl\'ausulas contradictorias o sustituci\'on no autorizada de instrucciones de rol sin versionado can\'onico~\cite{tafreshipour2025, miranda2026}.
+    \item \textbf{Deriva de Memoria ($M$):} Admisi\'on de afirmaciones alucinadas o especulativas sin soporte emp\'irico en la traza (\emph{false promotion}), sobrescritura destructiva de hechos consolidados y recuperaci\'on de estados expirados (\emph{stale reads})~\cite{rafique2026, qi2026, sureshkumar2026}.
+    \item \textbf{Deriva de Pol\'iticas ($\Pi$):} Invocaci\'on de herramientas fuera del perfil de capacidades asignado, argumentos que transgreden l\'imites operacionales y violaci\'on de precedencias temporales entre pasos cr\'iticos~\cite{wangh2026, wangs2026, xia2026}.
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    font=\sffamily\scriptsize,
+    node distance=0.45cm,
+    box/.style={draw=black!70, fill=blue!6, rounded corners=2pt, minimum width=2.1cm, minimum height=0.55cm, align=center},
+    hub/.style={draw=blue!80, fill=blue!12, rounded corners=3pt, minimum width=7.2cm, minimum height=0.65cm, align=center, font=\sffamily\scriptsize\bfseries},
+    specbox/.style={draw=green!60!black, fill=green!6, rounded corners=2pt, minimum width=2.0cm, minimum height=0.5cm, align=center, font=\sffamily\tiny},
+    audit/.style={draw=red!80, fill=red!8, rounded corners=3pt, minimum width=7.2cm, minimum height=0.6cm, align=center, font=\sffamily\scriptsize\bfseries},
+    arr/.style={-{Stealth[length=1.8mm]}, thick, draw=black!75},
+    darr/.style={-{Stealth[length=1.8mm]}, thick, dashed, draw=red!80}
+]
+\node[box] (a1) at (-2.45, 0) {\textbf{OrderTriage}\\ \tiny Triaje y Enrutamiento};
+\node[box] (a2) at (0, 0) {\textbf{InventoryAgent}\\ \tiny Control de Stock};
+\node[box] (a3) at (2.45, 0) {\textbf{BillingAgent}\\ \tiny Reembolsos y Pagos};
+
+\node[draw=black!40, dashed, rounded corners=3pt, fit=(a1) (a2) (a3), inner sep=0.12cm, label={[font=\tiny\bfseries, text=black!70]above:Entorno Multi-Agente (MAS-LLM)}] (mas_box) {};
+
+\node[hub, below=0.45cm of mas_box] (sp) {AgentArchSpanProcessor (OpenTelemetry v1.42.0)\\ \tiny Interceptor pasivo en m\'etodo \texttt{on\_end(span)}};
+
+\node[specbox] (sp_p) at (-2.35, -2.15) {\textbf{Prompts $P$}\\ \tiny Cl\'ausulas SHA-256};
+\node[specbox] (sp_m) at (0, -2.15) {\textbf{Memoria $M$}\\ \tiny No-destr. y TTL};
+\node[specbox] (sp_pi) at (2.35, -2.15) {\textbf{Pol\'iticas $\Pi$}\\ \tiny Precedencia y Args};
+
+\node[draw=green!60!black, dashed, rounded corners=3pt, fit=(sp_p) (sp_m) (sp_pi), inner sep=0.1cm, label={[font=\tiny\bfseries, text=green!50!black]below:Especificaci\'on Formal $B = \langle P, M, \Pi \rangle$}] (spec_box) {};
+
+\node[audit, below=0.6cm of spec_box] (auditq) {Cola de Auditor\'ia $\mathcal{Q}_{\text{audit}}$ (Canal As\'incrono No Bloqueante)\\ \tiny Emisi\'on de alertas $\mathcal{E} = \langle \text{trace\_id}, t^*, \text{DRIFT\_DETECTED}, \mathcal{V} \rangle$};
+
+\draw[arr] (mas_box.south) -- (sp.north) node[midway, right, font=\tiny] {\texttt{agentarch.*} spans};
+\draw[arr, stealth-stealth] (sp.south) -- (spec_box.north) node[midway, right, font=\tiny] {Chequeo determinista};
+\draw[darr] (spec_box.south) -- (auditq.north) node[midway, right, font=\tiny, text=red!80] {Alertas as\'incronas};
+\end{tikzpicture}
+\caption{Arquitectura general de \textsc{AgentArch} integrada con OpenTelemetry. El procesador pasivo intercepta tramos y emite alertas a la cola de auditor\'ia sin bloquear al agente.}
+\label{fig:architecture}
+\end{figure}
+
+Cuando no se detecta oportunamente, la deriva induce p\'erdida de \textbf{trazabilidad} (\emph{traceability}) y fallos en cascada. Como documenta Barrak~\cite{barrak2025}, las cadenas multi-agente no gobernadas sufren p\'erdidas de precisi\'on severas frente a modelos individuales debido a que los errores tempranos se transmiten silenciosamente a trav\'es de las fronteras de delegaci\'on. Asimismo, sin una disciplina formal, emergen vulnerabilidades de escalada de privilegios y ejecuci\'on insegura de efectos colaterales en el entorno operativo~\cite{wangh2026, wangs2026}.
+
+Aunque han surgido plataformas de observabilidad como LangSmith, Phoenix y AgentOps~\cite{dong2024}, estudios emp\'iricos recientes de Balusu~\cite{balusu2026}, Seyedghorban et al.~\cite{seyedghorban2026} y Atreja~\cite{atreja2026} revelan que las soluciones actuales son predominantemente pasivas y carecen de un modelo formal expl\'icito contra el cual contrastar invariantes multi-agente. Por otra parte, las propuestas de protecci\'on basadas en jueces LLM introducen latencias elevadas y variabilidad estoc\'astica~\cite{anand2026}, mientras que las reglas est\'aticas ad-hoc no rastrean la procedencia criptogr\'afica ni las relaciones de precedencia operacional~\cite{wangh2026}.
+
+En este contexto, enmarcado bajo los principios de la \textbf{investigaci\'on en ciencias del dise\~no} (\emph{Design Science Research}, DSR), concebimos la \textbf{verificaci\'on en tiempo de ejecuci\'on} (\emph{runtime verification}) y el \textbf{chequeo de conformidad} (\emph{conformance checking}) sobre trazas como un medio id\'oneo para gobernar la ejecuci\'on multi-agente. La Fig.~\ref{fig:architecture} ilustra la topolog\'ia general de nuestra propuesta, denominada \textsc{AgentArch}.
+
+\subsection{Delimitaci\'on Estricta del Alcance del Verificador}
+Para preservar el rigor metodol\'ogico y la viabilidad operacional de la versi\'on 1 (v1) de \textsc{AgentArch}, establecemos las siguientes delimitaciones expl\'icitas:
+\begin{enumerate}
+    \item \textbf{Enfoque Exclusivo de Detecci\'on y Notificaci\'on:} El verificador en tiempo de ejecuci\'on act\'ua exclusivamente como un \emph{monitor pasivo de conformidad}. Su cometido es interceptar la ejecuci\'on en el nivel de telemetr\'ia distribuida, contrastar cada transici\'on observada con la especificaci\'on $B = \langle P, M, \Pi \rangle$ y emitir de forma inmediata eventos estructurados de violaci\'on hacia una \textbf{cola de auditor\'ia}.
+    \item \textbf{Exclusi\'on de Intervenci\'on Activa (\emph{Enforcement} Fuera de Alcance):} Todo mecanismo de intervenci\'on activa en el flujo de ejecuci\'on ---como el bloqueo s\'incrono de llamadas a herramientas, la cancelaci\'on forzada del agente, la reescritura autom\'atica de argumentos o el filtrado de logits/tokens durante la decodificaci\'on--- queda formalmente fuera del alcance de este art\'iculo y se reserva para \textbf{trabajo futuro}.
+    \item \textbf{Exclusi\'on de Motores de Razonamiento Pesados:} En esta versi\'on se descarta el empleo en l\'inea de solucionadores SMT (e.g., Z3), plantillas de estrategia en grafos de juego y clasificadores de inferencia de lenguaje natural (NLI) en el bucle caliente de ejecuci\'on, fundamentando el dise\~no en chequeos deterministas de baja latencia.
+\end{enumerate}
+
+\subsection{Contribuciones Principales}
+Las contribuciones formales de este art\'iculo son:
+\begin{enumerate}
+    \item \textbf{S\'intesis Sistem\'atica de la Literatura:} An\'alisis comparativo estructurado de 26 art\'iculos fundamentales y recientes, contrastando formalismos, t\'ecnicas de verificaci\'on y soporte de telemetr\'ia (Tabla~\ref{tab:lit_comparison}).
+    \item \textbf{Formalizaci\'on del Espacio $B = \langle P, M, \Pi \rangle$:} Modelo arquitect\'onico expl\'icito que mapea cuatro de las dimensiones de Li et al.~\cite{li2026} a cl\'ausulas de prompt con resumen criptogr\'afico ($P$), memoria gobernada deterministamente ($M$) y reglas de precedencia operacional ($\Pi$).
+    \item \textbf{Taxonom\'ia de 9 Operadores de Deriva:} Definici\'on matem\'atica de operadores de deriva ($P_1\text{--}P_3, M_1\text{--}M_3, \Pi_1\text{--}\Pi_3$), diferenciando conceptualmente la deriva no determinista de agentes frente a la deriva de firmware~\cite{deangelis2026} (Tabla~\ref{tab:drift_operators}).
+    \item \textbf{Especificaci\'on Sem\'antica OpenTelemetry (\texttt{agentarch.*}):} Jerarqu\'ia unificada de cinco tramos y esquema estandarizado de atributos primitivos compatible con OpenTelemetry GenAI Semantic Conventions v1.42.0.
+    \item \textbf{Mecanismos de Chequeo de Conformidad:} Arquitectura de verificaci\'on por lotes y procesador pasivo en streaming (\texttt{AgentArchSpanProcessor}) que emite alertas a la cola de auditor\'ia sin bloquear al agente.
+    \item \textbf{Evaluaci\'on Emp\'irica Rigurosa:} Protocolo experimental ejecutado sobre un agente sint\'etico de soporte de pedidos a trav\'es de 50 escenarios controlados, demostrando precisi\'on y recall del 100\% en detecci\'on frente a l\'ineas base pasivas y de contorno, con una latencia despreciable de $1.65\;\mu$s.
+\end{enumerate}
+
+\begin{table*}[t]
+\caption{Matriz Comparativa de la S\'intesis Sistem\'atica de Literatura (26 Art\'iculos Fundamentales)}
+\label{tab:lit_comparison}
+\centering
+\scriptsize
+\begin{tabularx}{\textwidth}{lp{2.4cm}p{2.6cm}p{3.2cm}ccc}
+\toprule
+\textbf{Ref.} & \textbf{Autores y A\~no} & \textbf{Eje Tem\'atico} & \textbf{Formalismo / T\'ecnica} & \textbf{Runtime Verif.} & \textbf{Telemetr\'ia OTel} & \textbf{Eval. Emp\'irica} \\
+\midrule
+\cite{li2026} & Li et al. (2026) & Fundamentos Arquitect\'onicos & 5 dimensiones de arquitectura LLM & No & No & Conceptual \\
+\cite{miranda2026} & Miranda et al. (2026) & Modelado MDE & Metamodelo Ecore/EMF & No & No & Revisi\'on sistem\'atica \\
+\cite{lu2023} & Lu et al. (2023) & Arquitectura de Referencia & Patrones de IA responsable y AIBOM & No & No & Conceptual \\
+\cite{liu2024} & Liu et al. (2024) & Patrones de Dise\~no & Cat\'alogo de 18 patrones de agentes & No & No & Cualitativa \\
+\cite{becattini2025b} & Becattini et al. (2025) & Arquitectura Cognitiva & SALLMA (capa operacional y reflexiva) & No & No & Muestral \\
+\midrule
+\cite{deangelis2026} & De Angelis et al. (2026) & Deriva de Firmware & Trazas hardware HIT vs PlantUML & S\'i (Post-hoc) & No & 26 casos firmware \\
+\cite{xia2026} & Xia et al. (2026) & Verificaci\'on Concurrente & TLA+/PlusCal y contraejemplos TLC & S\'i (Offline) & No & 4 protocolos MAS \\
+\cite{wangh2026} & Wang et al. (2026) & Reglas de Pol\'itica & AgentSpec (disparo-predicado) & S\'i (Inline) & No & 3 benchmarks \\
+\cite{wangs2026} & Wang et al. (2026) & Cumplimiento de Pol\'itica & PEP/IFC sobre protocolo MCP & S\'i (Inline) & No & 10 pol\'iticas \\
+\cite{anand2026} & Anand et al. (2026) & Escudos Procedimentales & MENTOR (LTL finito y solucionador Z3) & S\'i (Inline) & No & 4 entornos sint\'eticos \\
+\cite{wangh2025} & Wang et al. (2025) & Verificaci\'on Probabil\'istica & Pro2Guard (DTMC y PRISM 4.0) & S\'i (Inline) & No & 3 casos de estudio \\
+\midrule
+\cite{balusu2026} & Balusu (2026) & Observabilidad LLM & AgentTelemetry (9 spans OpenTelemetry) & S\'i (Offline) & S\'i & SWE-bench Lite + Mocks \\
+\cite{seyedghorban2026} & Seyedghorban et al. (2026) & Inyecci\'on de Fallos & llmmas-otel sobre ChatDev & No (Monitoreo) & S\'i & 24 proyectos software \\
+\cite{dong2024} & Dong et al. (2024) & Modelado de Telemetr\'ia & AgentOps (modelo ER de tramos) & No (Monitoreo) & Parcial & 17 herramientas \\
+\cite{rombaut2025} & Rombaut et al. (2025) & Trazas Cognitivas & Watson (observabilidad retrospectiva) & No (Post-hoc) & No & 3 tareas complejas \\
+\cite{dorsch2025} & Dorsch et al. (2025) & Miner\'ia de Procesos & COMPASS (PM4Py sobre logs de eventos) & S\'i (Offline) & No & 1 escenario bancario \\
+\cite{atreja2026} & Atreja (2026) & An\'alisis Adversarial & Pathfinder (15,000 trazas relacionales) & No (Post-hoc) & No & Suite adversarial \\
+\cite{wangj2026} & Wang et al. (2026) & Encuesta de Trayectorias & Taxonom\'ia de 55 art\'iculos & No & No & Revisi\'on exhaustiva \\
+\cite{barrak2025} & Barrak (2025) & Trazabilidad Multi-Agente & Algoritmos de atribuci\'on de culpa & S\'i (Post-hoc) & No & Tuber\'ias secuenciales \\
+\midrule
+\cite{rafique2026} & Rafique y Bindschaedler (2026) & Memoria de Agentes & ClawVM (memoria virtual no destructiva) & S\'i (Inline) & No & 5 modelos LLM \\
+\cite{qi2026} & Qi et al. (2026) & Gobernanza de Memoria & GovMem (auditor\'ia de falsa promoci\'on) & S\'i (Online) & No & Benchmark sint\'etico \\
+\cite{sureshkumar2026} & Suresh Kumar et al. (2026) & Pol\'iticas de Memoria & MemArchitect (filtro Kalman y decaimiento) & S\'i (Inline) & No & 3 tareas memoria \\
+\cite{tafreshipour2025} & Tafreshipour et al. (2025) & Evoluci\'on de Prompts & Miner\'ia de 1,262 cambios en 243 repos & No & No & Emp\'irica repositorios \\
+\midrule
+\cite{patel2026} & Patel (2026) & Confianza Continua & TARV (puntuaciones heur\'isticas uniformes) & S\'i (Online) & No & Simulaci\'on de agentes \\
+\cite{paduraru2026} & Paduraru et al. (2026) & Gobernanza y Contratos & Marco conceptual de aseguramiento en 4 capas & S\'i (Offline) & No & No (Propuesta te\'orica) \\
+\cite{catarino2026} & Catarino et al. (2026) & Procedencia Criptogr\'afica & TraceCaps (c\'apsulas y riesgo recurrente) & S\'i (Inline) & No & Agente monosede \\
+\midrule
+\textbf{Ours} & \textbf{AgentArch (Este trabajo)} & \textbf{Deriva Arquitect\'onica MAS} & \textbf{Tupla $B = \langle P, M, \Pi \rangle$ + OpenTelemetry} & \textbf{S\'i (Streaming)} & \textbf{S\'i (v1.42.0)} & \textbf{50 Escenarios (Mocks + LLM)} \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\section{Trabajo Relacionado y S\'intesis Sistem\'atica}
+Para situar esta investigaci\'on en el panorama actual de la ingenier\'ia de software, analizamos sistem\'aticamente 26 art\'iculos fundamentales organizados en torno a cinco ejes tem\'aticos, sintetizados en la Tabla~\ref{tab:lit_comparison}:
+
+\subsection{Fundamentos Arquitect\'onicos y Modelado de MAS}
+La estructuraci\'on de agentes LLM como sistemas de software formales ha sido abordada recientemente desde diversas perspectivas. Li et al.~\cite{li2026} (ICSE-Companion 2026, pp.~484--485) establecen que la arquitectura en MAS no reside en relaciones de llamada est\'aticas, sino que debe gobernarse a trav\'es de cinco dimensiones estructurales: control, conocimiento, responsabilidad, restricciones y evoluci\'on. Miranda et al.~\cite{miranda2026} (MODELSWARD 2026, p.~38) conectan la ingenier\'ia dirigida por modelos (MDE) con frameworks de agentes proponiendo un metamodelo Ecore/EMF que separa construcci\'on y comunicaci\'on. Lu et al.~\cite{lu2023} (arXiv 2024, p.~5) dise\~nan una arquitectura de referencia para agentes responsables enfatizando salvaguardas y registro de procedencia (AIBOM). Liu et al.~\cite{liu2024} (arXiv 2024, p.~4) compilan un cat\'alogo de 18 patrones de dise\~no arquitect\'onico ante la incertidumbre cognitiva, mientras que Becattini et al.~\cite{becattini2025b} (IEEE SATrends 2025, p.~2) introducen SALLMA desacoplando la capa operacional de una capa reflexiva de conocimiento. Aunque estos trabajos proveen taxonom\'ias conceptuales indispensables, carecen de motores operacionales para verificar la conformidad de trazas en tiempo de ejecuci\'on.
+
+\subsection{Deriva Arquitect\'onica y Verificaci\'on en Ejecuci\'on}
+El concepto de deriva arquitect\'onica fue abordado recientemente en firmware cr\'itico por De Angelis et al.~\cite{deangelis2026} (arXiv 2026, p.~5), quienes diferencian trazas de hardware (HIT) frente a diagramas PlantUML clasificando discrepancias en \textsc{Confirmed}, \textsc{Missing}, \textsc{Additional} e \textsc{Inverted}. Sin embargo, su formalismo asume ejecuci\'on secuencial determinista en C/ensamblador, inaplicable a la estocasticidad de los LLMs. Para coordinaci\'on concurrente, Xia et al.~\cite{xia2026} (CAIS 2026, p.~4) proponen TraceFix para sintetizar topolog\'ias en PlusCal y verificar interbloqueos con TLC, aunque acotado por profundidad ($B_c=3$) y sin validar sem\'antica de argumentos. En protecci\'on de herramientas, Wang et al.~\cite{wangh2026} (ICSE 2026, p.~4) introducen AgentSpec evaluando predicados booleanos sobre puntos discretos de llamada, mientras que Wang et al.~\cite{wangs2026} (Electronics 2026, p.~7) formulan un Punto de Cumplimiento de Pol\'iticas (PEP) con control de flujo de informaci\'on para el protocolo MCP. Por su parte, Anand et al.~\cite{anand2026} (arXiv 2026, p.~4) desarrollan MENTOR combinando LTL finito con solucionadores SMT (Z3) para manuales procedimentales, y Wang et al.~\cite{wangh2025} proponen Pro2Guard empleando cadenas de Markov de tiempo discreto (DTMC) y el verificador de modelos PRISM para predecir probabilidades de alcanzar estados inseguros en CTL.
+
+\subsection{Observabilidad, Trazas y Telemetr\'ia Distribuida}
+La observabilidad estandarizada es el pilar de la verificaci\'on de trazas. Balusu~\cite{balusu2026} (AIware/FSE 2026, p.~2) introduce AgentTelemetry ampliando OpenTelemetry con 9 tramos especializados para detectar 14 categor\'ias de fallos en mocks deterministas y SWE-bench Lite. Seyedghorban et al.~\cite{seyedghorban2026} (ICST 2026, p.~3) presentan `llmmas-otel` para inyecci\'on pasiva de fallos en ChatDev. Dong et al.~\cite{dong2024} mapean 17 herramientas operacionales en un modelo entidad-relaci\'on de tramos de observabilidad. Rombaut et al.~\cite{rombaut2025} (ASE 2025, p.~4) conciben Watson para reconstruir retrospectivamente trazas de razonamiento cognitivo v\'ia agentes sustitutos. Dorsch et al.~\cite{dorsch2025} (CAiSE 2025, p.~35) presentan COMPASS aplicando miner\'ia de procesos con PM4Py sobre registros de eventos para detectar desviaciones procedimentales y consultas prematuras. Atreja~\cite{atreja2026} (CAIS 2026, p.~1337) dise\~na Pathfinder ingiriendo 15,000 trazas en bases de datos relacionales para diagn\'ostico post-hoc. En an\'alisis de trayectorias, Wang et al.~\cite{wangj2026} (IEEE TSE 2026, p.~8) sintetizan 55 art\'iculos revelando una profunda desconexi\'on entre la atribuci\'on de fallos y su mitigaci\'on en ejecuci\'on, mientras que Barrak~\cite{barrak2025} (ASEW 2025, p.~4) formaliza algoritmos de atribuci\'on de culpa y rastreo de da\~no en tuber\'ias secuenciales.
+
+\subsection{Gobernanza de Memoria y Mutaci\'on de Prompts}
+La persistencia y el contexto din\'amico constituyen fuentes primarias de deriva. Rafique y Bindschaedler~\cite{rafique2026} (EuroMLSys 2026, p.~4) dise\~nan ClawVM gestionando memoria virtual en p\'aginas tipadas con protocolos no destructivos. Qi et al.~\cite{qi2026} (IEEE MLISE 2026, p.~4) introducen GovMem para auditar propuestas de escritura y mitigar la falsa promoci\'on (reduciendo la tasa de 0.597 a 0.040 en benchmark sint\'etico, con carga de revisi\'on humana de 0.692 en trazas reales). Suresh Kumar et al.~\cite{sureshkumar2026} (arXiv 2026, p.~2) proponen MemArchitect desacoplando la memoria mediante filtros de Kalman y decaimiento temporal. Finalmente, Tafreshipour et al.~\cite{tafreshipour2025} (MSR 2025, p.~6) analizan emp\'iricamente 1,262 cambios de prompt en 243 repositorios identificando 15 categor\'ias de inconsistencias l\'ogicas introducidas por desarrolladores.
+
+\subsection{Distinci\'on Precisa Frente a Obras Cercanas}
+Para delimitar con precisi\'on la novedad cient\'ifica de este art\'iculo frente a los trabajos m\'as afines:
+\begin{enumerate}
+    \item \textbf{Frente a Patel (2026)~\cite{patel2026} (TARV):} Patel propone un middleware de monitoreo de confianza continua en cuatro dimensiones ($\tau^{\text{act}}, \tau^{\text{con}}, \tau^{\text{mem}}, \tau^{\text{comm}}$). No obstante, depende de funciones heur\'isticas con pesos uniformes fijos ($w_k = 0.25$), carece de un modelo arquitect\'onico formal de dise\~no y no efect\'ua chequeo determinista de violaciones. En contraste, \textsc{AgentArch} formula un espacio arquitect\'onico expl\'icito y declarativo $B = \langle P, M, \Pi \rangle$ con evaluaci\'on determinista de conformidad.
+    \item \textbf{Frente a Paduraru et al. (2026)~\cite{paduraru2026}:} Proponen un marco conceptual de aseguramiento en cuatro capas y formulan contratos matem\'aticos sobre trazas Message-Action ($\mathcal{I}^{\text{step}}, \mathcal{I}^{\text{trace}}$). Sin embargo, su contribuci\'on es estrictamente metodol\'ogica y no proporciona una implementaci\'on ejecutable ni evaluaci\'on emp\'irica con modelos reales (declarado expl\'icitamente como trabajo futuro en su formulaci\'on). \textsc{AgentArch} concreta estos principios en un procesador OpenTelemetry operativo y ejecutable sobre suites controladas.
+    \item \textbf{Frente a Catarino et al. (2026)~\cite{catarino2026} (TraceCaps):} Introduce c\'apsulas criptogr\'aficas para auditar la procedencia de prompts y memoria acopladas a una recurrencia lineal de riesgo acumulativo en agentes monosede. A diferencia de TraceCaps, \textsc{AgentArch} no busca estimar un riesgo escalar continuo, sino verificar formalmente el cumplimiento de invariantes arquitect\'onicos multi-agente, desglosando los prompts en cl\'ausulas versionadas con hash SHA-256 e integr\'andose de forma transparente en la telemetr\'ia distribuida est\'andar.
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    font=\sffamily\scriptsize,
+    pillar/.style={draw=blue!70, fill=blue!5, rounded corners=3pt, minimum width=2.25cm, minimum height=3.2cm, align=center},
+    card/.style={draw=black!60, fill=white, rounded corners=2pt, minimum width=2.05cm, minimum height=0.68cm, align=left, font=\tiny},
+    title/.style={font=\sffamily\scriptsize\bfseries, fill=blue!15, rounded corners=2pt, inner sep=2pt}
+]
+\node[pillar] (p_col) at (-2.55, 0) {};
+\node[title] at (-2.55, 1.3) {Prompts $P$};
+\node[card] at (-2.55, 0.65) {\textbf{$P_1$ Supresi\'on}\\ \textbullet{} Falta cl\'ausula oblig.};
+\node[card] at (-2.55, -0.05) {\textbf{$P_2$ Conflicto}\\ \textbullet{} Cl\'ausulas incompatibles};
+\node[card] at (-2.55, -0.75) {\textbf{$P_3$ Alteraci\'on}\\ \textbullet{} Digest SHA-256 mutado};
+
+\node[pillar] (m_col) at (0, 0) {};
+\node[title] at (0, 1.3) {Memoria $M$};
+\node[card] at (0, 0.65) {\textbf{$M_1$ Admisi\'on}\\ \textbullet{} Sin soporte verificado};
+\node[card] at (0, -0.05) {\textbf{$M_2$ Sobrescritura}\\ \textbullet{} Clave mutada sin auth};
+\node[card] at (0, -0.75) {\textbf{$M_3$ Caducidad}\\ \textbullet{} Lectura con TTL vencido};
+
+\node[pillar] (pi_col) at (2.55, 0) {};
+\node[title] at (2.55, 1.3) {Pol\'iticas $\Pi$};
+\node[card] at (2.55, 0.65) {\textbf{$\Pi_1$ Capacidad}\\ \textbullet{} Herramienta no autoriz.};
+\node[card] at (2.55, -0.05) {\textbf{$\Pi_2$ Argumentos}\\ \textbullet{} Violaci\'on rango/tipo};
+\node[card] at (2.55, -0.75) {\textbf{$\Pi_3$ Precedencia}\\ \textbullet{} Acci\'on sin prerrequisito};
+
+\node[draw=blue!80, dashed, rounded corners=4pt, fit=(p_col) (m_col) (pi_col), inner sep=0.1cm, label={[font=\scriptsize\bfseries, text=blue!80!black]above:Espacio de Comportamiento $B = \langle P, M, \Pi \rangle$}] {};
+\end{tikzpicture}
+\caption{Espacio de comportamiento $B = \langle P, M, \Pi \rangle$ y su taxonom\'ia de nueve operadores de deriva arquitect\'onica.}
+\label{fig:drift_space}
+\end{figure}
+
+\begin{table*}[t]
+\caption{Taxonom\'ia Formal de los 9 Operadores de Deriva Arquitect\'onica en Sistemas Multi-Agente}
+\label{tab:drift_operators}
+\centering
+\scriptsize
+\begin{tabularx}{\textwidth}{lp{2.4cm}p{3.0cm}p{4.2cm}p{4.0cm}}
+\toprule
+\textbf{Op.} & \textbf{Nombre Formal} & \textbf{Tramo OpenTelemetry} & \textbf{Condici\'on Formal de Violaci\'on} & \textbf{Ejemplo en Dominio de Pedidos} \\
+\midrule
+$P_1$ & Supresi\'on Mandatoria & \texttt{agentarch.agent\_turn} & $\exists r \in \mathcal{R}_i^{\text{req}} \text{ s.t. } r \notin \text{ids}(P_i)$ & Ausencia de cl\'ausula de autenticaci\'on en \texttt{OrderTriage} \\
+$P_2$ & Inyecci\'on de Conflicto & \texttt{agentarch.agent\_turn} & $\exists c_1, c_2 \in \text{ids}(P_i) : (c_1, c_2) \in \mathcal{M}_{\text{conflict}}$ & Coexistencia de cl\'ausula sin reembolso y reembolso total \\
+$P_3$ & Sustituci\'on No Autorizada & \texttt{agentarch.agent\_turn} & $\exists \langle \text{id}, h \rangle \in P_i, \; \langle \text{id}, h^0 \rangle \in P_i^0 : h \neq h^0$ & Digest SHA-256 de directiva de garant\'ia alterado \\
+\midrule
+$M_1$ & Admisi\'on No Verificada & \texttt{agentarch.memory\_op} & $(\text{op} = \text{write}) \wedge (\text{verified} = \text{false})$ & Persistencia de descuento prometido sin soporte en la traza \\
+$M_2$ & Sobrescritura Destructiva & \texttt{agentarch.memory\_op} & $(\text{op} = \text{write}) \wedge (k \in \mathcal{K}) \wedge (v' \neq \mathcal{K}[k]) \wedge \neg \text{auth}$ & Alteraci\'on de direcci\'on de env\'io sin bandera autorizada \\
+$M_3$ & Lectura Caducada & \texttt{agentarch.memory\_op} & $(\text{op} = \text{read}) \wedge (t_{\text{now}} - t_k > \text{TTL}_k)$ & Consumo de token de sesi\'on tras superar el per\'iodo de vigencia \\
+\midrule
+$\Pi_1$ & Herramienta No Permitida & \texttt{agentarch.tool\_call} & $\exists (t, \mathbf{args}) \text{ s.t. } t \notin K_i$ & \texttt{OrderTriage} ejecutando directamente transacci\'on financiera \\
+$\Pi_2$ & L\'imites de Argumentos & \texttt{agentarch.tool\_call} & $\exists x \in \mathbf{args} : \neg \text{SchemaCheck}(t, x)$ & Monto negativo o superior a \$1,000 en llamada a reembolso \\
+$\Pi_3$ & Inversi\'on de Precedencia & \texttt{agentarch.tool\_call} & $\exists e_t = B \in \tau : \forall t' < t, \; e_{t'} \neq A$ & Bloqueo o despacho de stock sin verificaci\'on previa en almac\'en \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\section{Espacio de Comportamiento del Agente $B = \langle P, M, \Pi \rangle$}
+
+\subsection{Correspondencia con las Dimensiones de Li et al. (2026)}
+Li, Xie, Ge y Liu~\cite{li2026} postulan en ICSE-Companion 2026 (Sec. 2, pp. 484--485) que la arquitectura de sistemas multi-agente basados en LLMs debe estructurarse en torno a cinco dimensiones fundamentales:
+\begin{itemize}
+    \item \emph{Control structures}: Mapeadas en nuestro marco a las reglas de precedencia operacional $\Pi_{\text{order}}$ dentro de $\Pi$.
+    \item \emph{Knowledge structures}: Mapeadas a las pol\'iticas de admisi\'on, mutaci\'on y vigencia del espacio de memoria gobernado $M$.
+    \item \emph{Constraint structures}: Mapeadas a las restricciones de invocaci\'on de herramientas $\Pi_{\text{tool}}$ y validaci\'on de argumentos $\Pi_{\text{args}}$.
+    \item \emph{Evolution structures}: Mapeadas a los conjuntos de cl\'ausulas versionadas criptogr\'aficamente en $P$ y al ciclo de vida de registros en $M$.
+    \item \emph{Responsibility structures}: No encajan directamente en la tupla de comportamiento interno $B$. Como reconocen Li et al.~\cite{li2026} y Barrak~\cite{barrak2025}, la estructura de responsabilidad pertenece al plano de gobernanza externa, bit\'acoras de auditor\'ia encadenadas y algoritmos post-hoc de atribuci\'on de culpa, por lo que es gestionada por la cola de auditor\'ia $\mathcal{Q}_{\text{audit}}$ y no por las transiciones at\'omicas del agente.
+\end{itemize}
+
+La Fig.~\ref{fig:drift_space} sintetiza la organizaci\'on de la tupla $B = \langle P, M, \Pi \rangle$ y la Tabla~\ref{tab:drift_operators} detalla su taxonom\'ia.
+
+\subsection{El Espacio de Prompts $P$}
+En lugar de almacenar cadenas de texto extensas y no estructuradas en la telemetr\'ia, descomponemos el prompt del agente $i$ en un conjunto discreto de cl\'ausulas formales:
+\begin{equation}
+P_i = \{ \langle \text{id}_k, \text{hash}_k \rangle \}_{k=1}^K
+\end{equation}
+donde $\text{id}_k \in \mathcal{U}_{\text{clauses}}$ es un identificador sem\'antico \'unico y $\text{hash}_k = \text{SHA256}(\text{texto}_k)$ es el digest criptogr\'afico inmutable de su contenido can\'onico. Denotamos por $\text{ids}(P_i) = \{ \text{id} \mid \langle \text{id}, h \rangle \in P_i \}$ el conjunto de identificadores activos.
+
+\subsubsection{Operadores de Deriva de Prompt ($P_1\text{--}P_3$)}
+\begin{itemize}
+    \item \textbf{$P_1$ (Supresi\'on de Instrucci\'on Obligatoria):} La traza no registra el identificador de una directiva mandatoria de seguridad:
+    \begin{equation}
+    P_1(P_i) \iff \exists r \in \mathcal{R}_i^{\text{req}} \quad \text{tal que} \quad r \notin \text{ids}(P_i)
+    \end{equation}
+    \item \textbf{$P_2$ (Inyecci\'on de Cl\'ausulas Contradictorias):} Coexisten cl\'ausulas incompatibles seg\'un la matriz est\'atica de conflicto $\mathcal{M}_{\text{conflict}}$~\cite{tafreshipour2025}:
+    \begin{equation}
+    P_2(P_i) \iff \exists c_1, c_2 \in \text{ids}(P_i) : (c_1, c_2) \in \mathcal{M}_{\text{conflict}}
+    \end{equation}
+    \item \textbf{$P_3$ (Sustituci\'on No Autorizada de Cl\'ausula):} El identificador de cl\'ausula est\'a presente pero su digest criptogr\'afico diverge del digest can\'onico aprobado en dise\~no:
+    \begin{equation}
+    P_3(P_i) \iff \exists \langle \text{id}, h \rangle \in P_i, \; \langle \text{id}, h^0 \rangle \in P_i^0 : h \neq h^0
+    \end{equation}
+\end{itemize}
+
+\subsection{El Espacio de Memoria Gobernado $M$}
+El estado de memoria transaccional se modela como un almac\'en de registros clave-valor $\mathcal{K} = \{m_k\}_{k=1}^K$, donde cada registro se define como $m_k = \langle \text{clave}_k, \text{valor}_k, t_k, \text{TTL}_k, \text{flags}_k \rangle$.
+
+\subsubsection{Operadores de Deriva de Memoria ($M_1\text{--}M_3$)}
+\begin{itemize}
+    \item \textbf{$M_1$ (Violaci\'on de Admisi\'on de Memoria):} Intento de persistir informaci\'on sin la marca de soporte emp\'irico previo en la traza~\cite{qi2026}:
+    \begin{equation}
+    M_1(M) \iff (\text{op} = \text{write}) \wedge (\text{verified} = \text{false})
+    \end{equation}
+    donde $\text{verified}$ corresponde al atributo booleano \texttt{agentarch.memory.verified} registrado en el tramo.
+    \item \textbf{$M_2$ (Sobrescritura Determinista Contradictoria):} Intento de sobrescribir una clave existente con un valor distinto sin autorizaci\'on expl\'icita~\cite{rafique2026}:
+    \begin{equation}
+    \begin{split}
+    M_2(M) \iff \; & (\text{op} = \text{write}) \wedge (k \in \text{dom}(\mathcal{K})) \\
+    & \wedge (v' \neq \mathcal{K}[k]) \wedge \neg \text{auth\_replace}
+    \end{split}
+    \end{equation}
+    donde $\text{auth\_replace}$ denota la bandera \texttt{agentarch.memory.authorized\_replacement}. Esta regla determinista elimina la necesidad de clasificadores estoc\'asticos NLI en tiempo de ejecuci\'on.
+    \item \textbf{$M_3$ (Lectura de Memoria Expirada):} Consumo de un registro de memoria cuyo tiempo de vida \'util (TTL) ha caducado respecto a la marca temporal actual:
+    \begin{equation}
+    M_3(M) \iff (\text{op} = \text{read}) \wedge (t_{\text{now}} - t_k > \text{TTL}_k)
+    \end{equation}
+    El verificador computa la vigencia directamente a partir de $t_{\text{now}}$, $t_k$ y $\text{TTL}_k$ registrados en la traza. A diferencia de modelos continuos de decaimiento cognitivo~\cite{sureshkumar2026}, en la versi\'on 1 de \textsc{AgentArch} se adopta una cota determinista por TTL computada directamente sobre las marcas temporales.
+\end{itemize}
+
+\subsection{El Espacio de Pol\'iticas e Invariantes $\Pi$}
+El espacio $\Pi = \langle \Pi_{\text{tool}}, \Pi_{\text{args}}, \Pi_{\text{order}} \rangle$ gobierna la interacci\'on operacional con el entorno.
+
+\subsubsection{Operadores de Deriva de Pol\'iticas ($\Pi_1\text{--}\Pi_3$)}
+\begin{itemize}
+    \item \textbf{$\Pi_1$ (Invocaci\'on de Herramienta No Permitida):} El agente emite una llamada a una herramienta $t$ fuera de su perfil est\'atico de capacidades $K_i$~\cite{wangh2026, wangs2026}:
+    \begin{equation}
+    \Pi_1(\Pi) \iff \exists (t, \mathbf{args}) \quad \text{con} \quad t \notin K_i
+    \end{equation}
+    \item \textbf{$\Pi_2$ (Violaci\'on de L\'imites de Argumentos):} Los par\'ametros violan rangos num\'ericos, listas blancas o tipos v\'alidos:
+    \begin{equation}
+    \Pi_2(\Pi) \iff \exists x \in \mathbf{args} : \neg \text{SchemaCheck}(t, x)
+    \end{equation}
+    \item \textbf{$\Pi_3$ (Inversi\'on de Precedencia Operacional):} Para un par de operaciones con dependencia causal $(A, B)$, $B$ se invoca en la traza $\tau$ sin que haya ocurrido previamente un evento completado de tipo $A$ en la misma sesi\'on~\cite{xia2026}:
+    \begin{equation}
+    \Pi_3(\Pi) \iff \exists e_t = B \in \tau : \forall t' < t, \; e_{t'} \neq A
+    \end{equation}
+    La formalizaci\'on temporal completa basada en LTL se traslada a trabajo futuro.
+\end{itemize}
+
+\section{Especificaci\'on Sem\'antica OpenTelemetry (\texttt{agentarch.*})}
+
+\subsection{Jerarqu\'ia Unificada de Tramos (Spans)}
+Para estandarizar la observabilidad distribuida, definimos cinco nombres \'unicos de tramos utilizados de forma id\'entica tanto en el modelo conceptual como en los algoritmos de verificaci\'on:
+\begin{enumerate}
+    \item \texttt{agentarch.session}: Span ra\'iz que encapsula la tarea global del usuario.
+    \item \texttt{agentarch.agent\_turn}: Tramo at\'omico de ejecuci\'on y razonamiento del agente, donde se registran los atributos del prompt ($P_1\text{--}P_3$).
+    \item \texttt{agentarch.memory\_op}: Tramo que instrumenta cada operaci\'on sobre el almac\'en de memoria ($M_1\text{--}M_3$).
+    \item \texttt{agentarch.tool\_call}: Tramo que captura la invocaci\'on de herramientas externas ($\Pi_1\text{--}\Pi_3$).
+    \item \texttt{agentarch.conformance}: Evento o sub-tramo emitido hacia la cola de auditor\'ia al detectar o verificar conformidad.
+\end{enumerate}
+
+\subsection{Esquema de Atributos Primitivos}
+En estricta conformidad con las directrices de dise\~no de OpenTelemetry, todos los atributos instrumentados en \textsc{AgentArch} se restringen rigurosamente a tipos primitivos escalares (\texttt{string}, \texttt{bool}, \texttt{int64}) o arreglos unidimensionales de primitivos (\texttt{string[]}):
+\begin{itemize}
+    \item \texttt{gen\_ai.provider.name} (\texttt{string}): Proveedor LLM utilizado (est\'andar SemConv v1.42.0~\cite{balusu2026}).
+    \item \texttt{gen\_ai.request.model} (\texttt{string}): Nombre can\'onico del modelo fundacional (e.g., \texttt{llama-3.1-8b-instruct}).
+    \item \texttt{agentarch.agent.id} (\texttt{string}): Identificador \'unico de la instancia del agente.
+    \item \texttt{agentarch.agent.role} (\texttt{string}): Rol arquitect\'onico asignado (\texttt{OrderTriage}, \texttt{InventoryAgent}, \texttt{BillingAgent}).
+    \item \texttt{agentarch.prompt.active\_clause\_ids} (\texttt{string[]}): Arreglo de identificadores de cl\'ausulas activas en el turno.
+    \item \texttt{agentarch.prompt.active\_clause\_hashes} (\texttt{string[]}): Res\'umenes criptogr\'aficos SHA-256 de las cl\'ausulas activas.
+    \item \texttt{agentarch.memory.op} (\texttt{string}): Operaci\'on sobre memoria (\texttt{read}, \texttt{write}, \texttt{evict}).
+    \item \texttt{agentarch.memory.key} (\texttt{string}): Clave del registro consultado o persistido.
+    \item \texttt{agentarch.memory.new\_value} (\texttt{string}): Valor serializado a persistir en memoria.
+    \item \texttt{agentarch.memory.timestamp} (\texttt{int64}): Marca temporal Unix (ms) del registro.
+    \item \texttt{agentarch.memory.ttl} (\texttt{int64}): Tiempo de vida \'util asignado al registro (ms).
+    \item \texttt{agentarch.memory.verified} (\texttt{bool}): Bandera booleana de soporte emp\'irico previo en la traza.
+    \item \texttt{agentarch.memory.authorized\_replacement} (\texttt{bool}): Bandera que autoriza la sobrescritura de una clave preexistente.
+    \item \texttt{agentarch.tool.name} (\texttt{string}): Nombre can\'onico de la herramienta invocada.
+    \item \texttt{agentarch.tool.args} (\texttt{string}): Argumentos de la invocaci\'on serializados como cadena JSON est\'andar.
+    \item \texttt{agentarch.conformance.status} (\texttt{string}): Veredicto emitido (\texttt{CONFORMANT} o \texttt{DRIFT\_DETECTED}).
+    \item \texttt{agentarch.conformance.operator} (\texttt{string}): Operador de deriva detectado ($P_1\text{--}P_3, M_1\text{--}M_3, \Pi_1\text{--}\Pi_3$).
+\end{itemize}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    font=\sffamily\tiny,
+    node distance=0.45cm,
+    startstop/.style={rectangle, rounded corners=3pt, minimum width=2.4cm, minimum height=0.45cm, align=center, draw=black!70, fill=gray!15},
+    decision/.style={diamond, aspect=2.2, minimum width=2.2cm, minimum height=0.45cm, align=center, draw=blue!70, fill=blue!10},
+    process/.style={rectangle, rounded corners=2pt, minimum width=2.2cm, minimum height=0.55cm, align=center, draw=black!70, fill=blue!5},
+    io/.style={trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=2.4cm, minimum height=0.45cm, align=center, draw=red!70, fill=red!10},
+    arr/.style={-{Stealth[length=1.5mm]}, thick, draw=black!75}
+]
+\node[startstop] (start) at (0, 0) {\texttt{on\_end(span)} (OpenTelemetry SDK)};
+\node[decision] (dec_type) at (0, -0.85) {Tipo de tramo?};
+
+\node[process] (p_turn) at (-2.6, -2.0) {\textbf{\texttt{agent\_turn}}\\Evaluar $P_1, P_2, P_3$};
+\node[process] (p_mem) at (0, -2.0) {\textbf{\texttt{memory\_op}}\\Evaluar $M_1, M_2, M_3$};
+\node[process] (p_tool) at (2.6, -2.0) {\textbf{\texttt{tool\_call}}\\Evaluar $\Pi_1, \Pi_2, \Pi_3$};
+
+\node[decision] (dec_viol) at (0, -3.2) {$\mathcal{V} \neq \emptyset$?};
+\node[io] (emit) at (0, -4.15) {Emitir evento $\mathcal{E}$ a $\mathcal{Q}_{\text{audit}}$};
+\node[startstop] (fin) at (0, -5.0) {Retornar sin bloqueo};
+
+\draw[arr] (start) -- (dec_type);
+\draw[arr] (dec_type) -| (p_turn);
+\draw[arr] (dec_type) -- (p_mem);
+\draw[arr] (dec_type) -| (p_tool);
+
+\draw[arr] (p_turn) |- (dec_viol);
+\draw[arr] (p_mem) -- (dec_viol);
+\draw[arr] (p_tool) |- (dec_viol);
+
+\draw[arr] (dec_viol) -- node[right, font=\tiny] {S\'i} (emit);
+\draw[arr] (emit) -- (fin);
+\draw[arr] (dec_viol.east) -- ++(1.4, 0) |- node[near start, above, font=\tiny] {No} (fin.east);
+\end{tikzpicture}
+\caption{Diagrama de flujo operacional del \texttt{AgentArchSpanProcessor} ejecutado de forma as\'incrona en la telemetr\'ia distribuida.}
+\label{fig:flowchart}
+\end{figure}
+
+\section{Mecanismos de Chequeo de Conformidad}
+
+\subsection{Verificaci\'on Determinista Fuera de L\'inea}
+Para auditar la conformidad de una traza consolidada $\tau$ frente a la especificaci\'on $B = \langle P, M, \Pi \rangle$, el verificador fuera de l\'inea recorre linealmente la secuencia temporal de tramos de la sesi\'on.
+\begin{itemize}
+    \item \textbf{Tramos \texttt{agent\_turn}:} Se extrae el conjunto de identificadores activos y se contrasta frente a las cl\'ausulas requeridas de dise\~no ($P_1$). Posteriormente se cruzan los pares con la matriz est\'atica de exclusi\'on mutua $\mathcal{M}_{\text{conflict}}$ ($P_2$), y se valida la integridad de cada digest SHA-256 frente al valor can\'onico can\'onicamente registrado ($P_3$).
+    \item \textbf{Tramos \texttt{memory\_op}:} Para escrituras, se comprueba la marca booleana de soporte emp\'irico ($M_1$), se detectan sobrescrituras destructivas sobre claves preexistentes sin autorizaci\'on expl\'icita ($M_2$) y se actualiza el estado transaccional local. Para lecturas, se eval\'ua la condici\'on de expiraci\'on contrastando la marca temporal actual con la marca de persistencia y el TTL registrado ($M_3$).
+    \item \textbf{Tramos \texttt{tool\_call}:} Se valida la pertenencia de la herramienta al perfil de capacidades del rol ($\Pi_1$), la satisfacci\'on de invariantes num\'ericos y tipados en los argumentos JSON ($\Pi_2$), y el cumplimiento de las restricciones de precedencia causal ($\Pi_3$) inspeccionando el historial de operaciones completadas previamente en la traza.
+\end{itemize}
+
+\subsection{Monitor Pasivo en Streaming (\texttt{AgentArchSpanProcessor})}
+Para ejecuciones en l\'inea, formulamos el procesador pasivo \texttt{AgentArchSpanProcessor}, dise\~nado conforme a la especificaci\'on de extensiones de OpenTelemetry SDK. A diferencia de esquemas invasivos de intercepci\'on, este procesador implementa exclusivamente el gancho de finalizaci\'on \texttt{on\_end(span)}, activ\'andose inmediatamente despu\'es de que el tramo concluye su ciclo de ejecuci\'on.
+
+Como ilustra la Fig.~\ref{fig:flowchart}, el procesador inspecciona los atributos normalizados del tramo, eval\'ua los operadores de deriva pertinentes y, ante cualquier transgresi\'on detectada, sintetiza un evento de violaci\'on estructurado $\mathcal{E} = \langle \text{trace\_id}, \text{span\_id}, t^*, \text{"DRIFT\_DETECTED"}, \mathcal{V} \rangle$. Dicho evento se encola de forma estrictamente as\'incrona en la cola de auditor\'ia $\mathcal{Q}_{\text{audit}}$. En ning\'un caso el monitor bloquea, retrasa, cancela o reescribe la decodificaci\'on ni las acciones de los agentes.
+
+\subsection{Disponibilidad del C\'odigo y Reproducibilidad}
+Con el prop\'osito de facilitar la reproducibilidad total y la verificaci\'on independiente de los resultados, la implementaci\'on de referencia ejecutable tanto del verificador por lotes como del procesador pasivo en streaming \texttt{AgentArchSpanProcessor}, junto con el arn\'es de prueba y los 50 escenarios controlados, est\'an disponibles abiertamente en el repositorio p\'ublico del proyecto.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    font=\sffamily\tiny,
+    lifeline/.style={draw=black!50, dashed, thick},
+    agent/.style={draw=blue!80, fill=blue!10, rounded corners=2pt, minimum width=1.45cm, minimum height=0.45cm, align=center, font=\sffamily\tiny\bfseries},
+    msg/.style={-{Stealth[length=1.5mm]}, thick, draw=black!80},
+    driftmsg/.style={-{Stealth[length=1.5mm]}, thick, draw=red!80},
+    note/.style={draw=red!80, fill=red!10, rounded corners=2pt, font=\tiny, align=center, inner sep=1.2pt}
+]
+\node[agent] (usr) at (0, 0) {Cliente};
+\node[agent] (tri) at (2.2, 0) {OrderTriage};
+\node[agent] (inv) at (4.4, 0) {InventoryAgent};
+\node[agent] (bil) at (6.6, 0) {BillingAgent};
+
+\draw[lifeline] (usr) -- (0, -5.15);
+\draw[lifeline] (tri) -- (2.2, -5.15);
+\draw[lifeline] (inv) -- (4.4, -5.15);
+\draw[lifeline] (bil) -- (6.6, -5.15);
+
+\draw[msg] (0, -0.85) -- (2.2, -0.85) node[midway, above, font=\tiny, yshift=1pt] {1: Solicitud pedido};
+\node[note] at (2.2, -1.35) {Deriva $P_1$: directiva auth ausente};
+
+\draw[msg] (2.2, -1.85) -- (4.4, -1.85) node[midway, above, font=\tiny, yshift=1pt] {2: Consultar stock};
+\draw[msg] (4.4, -2.35) -- (2.2, -2.35) node[midway, above, font=\tiny, yshift=1pt] {3: Confirmaci\'on};
+
+\draw[driftmsg] (2.2, -2.95) -- (6.6, -2.95) node[midway, above, font=\tiny, text=red!80, yshift=1pt] {4: Reembolso directo};
+\node[note] at (4.4, -3.45) {Deriva $\Pi_1$: herramienta no permitida};
+
+\draw[driftmsg] (6.6, -3.95) -- ++(0.6, 0) -- ++(0, -0.4) -- (6.6, -4.35) node[right=0.05cm, font=\tiny, text=red!80] {5: Mutaci\'on};
+\node[note] at (6.6, -4.75) {Deriva $M_2$: sobrescritura no autorizada};
+\end{tikzpicture}
+\caption{Diagrama de interacci\'on del agente de soporte de pedidos ilustrando puntos de inyecci\'on y detecci\'on de derivas ($P_1, \Pi_1, M_2$).}
+\label{fig:sequence}
+\end{figure}
+
+\begin{table*}[t]
+\caption{Cat\'alogo y Distribuci\'on del Corpus de 50 Escenarios de Evaluaci\'on Experimental}
+\label{tab:scenarios_corpus}
+\centering
+\scriptsize
+\begin{tabularx}{\textwidth}{lccp{3.8cm}p{7.2cm}}
+\toprule
+\textbf{Categor\'ia} & \textbf{Rango IDs} & \textbf{Cant.} & \textbf{Operador Evaluado} & \textbf{Descripci\'on Operacional y Comportamiento Inyectado} \\
+\midrule
+\textbf{Nominal} & S01--S10 & 10 & Ninguno (Conforme) & Consultas regulares de estado, actualizaci\'on v\'alida de domicilio con autorizaci\'on expl\'icita, verificaci\'on secuencial de inventario y reservas dentro de l\'imites permitidos. \\
+\midrule
+\multirow{3}{*}{\textbf{Prompt}} & S11--S14 & 4 & $P_1$ (Supresi\'on Mandatoria) & Omisi\'on intencionada de la directiva de seguridad mandatoria \texttt{clause\_auth} en el turno del agente \texttt{OrderTriage}. \\
+& S15--S18 & 4 & $P_2$ (Inyecci\'on de Conflicto) & Inclusi\'on simult\'anea de directivas excluyentes seg\'un $\mathcal{M}_{\text{conflict}}$ (\texttt{clause\_no\_refund} y \texttt{clause\_unconditional\_refund}). \\
+& S19--S22 & 4 & $P_3$ (Sustituci\'on No Autorizada) & Mutaci\'on arbitraria del texto de la directiva \texttt{clause\_warranty\_terms}, provocando divergencia en su digest SHA-256 can\'onico. \\
+\midrule
+\multirow{3}{*}{\textbf{Memoria}} & S23--S27 & 5 & $M_1$ (Admisi\'on No Verificada) & Intento de persistir acuerdos de descuento especulativos sin la marca de soporte emp\'irico previo (\texttt{verified = false}). \\
+& S28--S32 & 5 & $M_2$ (Sobrescritura Destructiva) & Sobrescritura de la direcci\'on postal previamente consolidada con un valor discrepante sin la bandera \texttt{authorized\_replacement}. \\
+& S33--S36 & 4 & $M_3$ (Lectura Caducada) & Lectura de un token de sesi\'on temporal cuya marca de tiempo supera el l\'imite de vigencia asignado en su TTL. \\
+\midrule
+\multirow{3}{*}{\textbf{Pol\'iticas}} & S37--S41 & 5 & $\Pi_1$ (Herramienta No Permitida) & El agente \texttt{OrderTriage} invoca directamente \texttt{process\_payment}, herramienta reservada exclusivamente al rol \texttt{BillingAgent}. \\
+& S42--S46 & 5 & $\Pi_2$ (L\'imites de Argumentos) & Invocaci\'on de \texttt{calculate\_refund} con valores monetarios negativos o que exceden el l\'imite m\'aximo parametrizado (\$1,000). \\
+& S47--S50 & 4 & $\Pi_3$ (Inversi\'on de Precedencia) & Invocaci\'on de la acci\'on cr\'itica \texttt{reserve\_stock} sin haber ejecutado satisfactoriamente la consulta previa \texttt{verify\_inventory}. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\section{Dise\~no y Resultados de la Evaluaci\'on Experimental}
+
+\subsection{Sujeto de Evaluaci\'on: Agente de Soporte de Pedidos}
+Para evaluar la capacidad de detecci\'on sin incurrir en dependencias propietarias o costos impredecibles de API, se define un sistema multi-agente sint\'etico de \textbf{soporte y atenci\'on de pedidos de comercio electr\'onico} (\emph{Customer Order Support Agent}). El sistema se estructura en tres roles complementarios (Fig.~\ref{fig:sequence}):
+\begin{enumerate}
+    \item \texttt{OrderTriage}: Analiza la solicitud del cliente, extrae intenciones y delega a las entidades pertinentes.
+    \item \texttt{InventoryAgent}: Verifica inventario, consulta el estado de env\'ios en la API log\'istica y reserva unidades de reemplazo.
+    \item \texttt{BillingAgent}: Aplica notas de cr\'edito, calcula penalidades y autoriza desembolsos financieros.
+\end{enumerate}
+
+\subsection{Corpus de Evaluaci\'on: 50 Escenarios Controlados}
+Se estructura una suite de 50 escenarios con anotaciones can\'onicas completas de \textbf{verdad fundamental} (\emph{ground truth}), clasificados en cuatro categor\'ias como se detalla en la Tabla~\ref{tab:scenarios_corpus}: 10 escenarios nominales y 40 escenarios an\'omalos distribuidos equilibradamente entre los 9 operadores de deriva formalizados ($P_1\text{--}P_3, M_1\text{--}M_3, \Pi_1\text{--}\Pi_3$).
+
+\subsection{Modos de Ejecuci\'on y L\'ineas Base}
+Para aislar rigurosamente la correcci\'on del verificador de la variabilidad del modelo, se implementan dos modos complementarios:
+\begin{enumerate}
+    \item \textbf{Modo Guionizado (\emph{Scripted Deterministic Mocks}):} Clientes simulados deterministas que reproducen secuencias de llamadas prefijadas (siguiendo el esquema metodol\'ogico de Balusu~\cite{balusu2026} y Wang et al.~\cite{wangs2026}). Este modo garantiza reproducibilidad matem\'atica total y act\'ua como una \textbf{validaci\'on de correcci\'on interna del verificador}, no como una prueba de generalizaci\'on.
+    \item \textbf{Modo con Modelo Abierto Local (\emph{Local Open-Weights}):} Despliegue del agente acoplado a un modelo de pesos abiertos local (LLaMA-3.1-8B-Instruct servido localmente a temperatura 0). Este modo permite medir la tasa de falsos positivos en ejecuciones sem\'anticas no prefijadas y registrar la sobrecarga real de intercepci\'on ($\Delta \mu$s).
+\end{enumerate}
+
+Se comparan las siguientes configuraciones de control:
+\begin{itemize}
+    \item \textbf{L\'inea Base $B_1$ (Observabilidad Pasiva Est\'andar):} Trazado OpenTelemetry cl\'asico (\texttt{rpc.*}, \texttt{gen\_ai.*}) que registra errores HTTP y c\'odigos de estado, pero carece de un modelo formal $B = \langle P, M, \Pi \rangle$.
+    \item \textbf{L\'inea Base $B_2$ (Reglas de Pol\'iticas Estilo AgentSpec):} Reimplementaci\'on limpia e independiente inspirada en el DSL de disparo-predicado de Wang et al.~\cite{wangh2026} (\textsc{AgentSpec}) sobre l\'imites de herramientas. No cuenta con seguimiento criptogr\'afico de prompts ni vigencia de memoria por TTL.
+    \item \textbf{Propuesto ($B_{\text{prop}}$ - \textsc{AgentArch}):} Nuestro marco integral de verificaci\'on de conformidad y telemetr\'ia sem\'antica \texttt{agentarch.*}.
+\end{itemize}
+
+\subsection{Resultados Cuantitativos y An\'alisis Comparativo}
+Ejecutamos la suite completa de 50 escenarios sobre las tres configuraciones bajo condiciones controladas de laboratorio. Las m\'etricas cuantitativas obtenidas se consolidan en la Tabla~\ref{tab:experimental_results}, mientras que la Tabla~\ref{tab:latency_bench} reporta la caracterizaci\'on microbenchmarking de la sobrecarga temporal ($N=50,000$ iteraciones por tramo).
+
+\begin{table*}[t]
+\caption{Matriz de Resultados Experimentales Cuantitativos ($B_1$ vs $B_2$ vs $B_{\text{prop}}$ sobre 50 Escenarios)}
+\label{tab:experimental_results}
+\centering
+\scriptsize
+\begin{tabularx}{\textwidth}{lcccccccccc}
+\toprule
+\multirow{2}{*}{\textbf{Configuraci\'on}} & \textbf{Nominal} & \multicolumn{2}{c}{\textbf{Prompt (12 esc.)}} & \multicolumn{2}{c}{\textbf{Memoria (14 esc.)}} & \multicolumn{2}{c}{\textbf{Pol\'iticas (14 esc.)}} & \multicolumn{3}{c}{\textbf{Evaluaci\'on Global}} \\
+\cmidrule(lr){2-2} \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-11}
+& \textbf{FPR (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Precisi\'on} & \textbf{Recall} & \textbf{$F_1$-Score} & \textbf{$t^*$ Acc.} & \textbf{Latencia Media} \\
+\midrule
+\textbf{L\'inea Base $B_1$ (Pasiva OTel)} & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & $2.60\;\mu$s \\
+\textbf{L\'inea Base $B_2$ (AgentSpec)} & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 71.4\% & 83.3\% & 100.0\% & 25.0\% & 40.0\% & 25.0\% & $30.97\;\mu$s \\
+\textbf{Propuesto $B_{\text{prop}}$ (\textsc{AgentArch})} & \textbf{0.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & $\mathbf{38.14\;\mu}$\textbf{s} \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table}[t]
+\caption{Sobrecarga de Latencia por Tipo de Tramo ($\Delta \mu$s, $N=50,000$ Muestras)}
+\label{tab:latency_bench}
+\centering
+\scriptsize
+\begin{tabularx}{\columnwidth}{Xlrr}
+\toprule
+\textbf{Tramo OpenTelemetry} & \textbf{Operadores} & \textbf{Media} & \textbf{Desv.} \\
+\midrule
+\texttt{agentarch.agent\_turn} & $P_1\text{--}P_3$ & $2.64\;\mu$s & $\pm 0.12$ \\
+\texttt{agentarch.memory\_op} & $M_1\text{--}M_3$ & $0.74\;\mu$s & $\pm 0.05$ \\
+\texttt{agentarch.tool\_call} & $\Pi_1\text{--}\Pi_3$ & $1.58\;\mu$s & $\pm 0.08$ \\
+\midrule
+\textbf{Promedio Ponderado} & \textbf{Ciclo completo} & $\mathbf{1.65\;\mu}$\textbf{s} & $\mathbf{\pm 0.08}$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El an\'alisis detallado de las mediciones evidencia los siguientes hallazgos:
+\begin{enumerate}
+    \item \textbf{Ceguera Estructural de la Observabilidad Pasiva ($B_1$):} La l\'inea base $B_1$ no logr\'o detectar ninguna de las 40 anomal\'ias inyectadas (Recall = 0.0\%, $F_1$ = 0.0\%). Debido a que los agentes LLM emiten c\'odigos de respuesta HTTP 200 v\'alidos aun cuando sus transiciones violan invariantes arquitect\'onicos, la telemetr\'ia pasiva tradicional resulta completamente ciega ante la deriva sem\'antica.
+    \item \textbf{Alcance Parcial de las Reglas de Contorno ($B_2$):} $B_2$ alcanz\'o una precisi\'on del 100.0\%, pero su exhaustividad global se limit\'o al 25.0\% ($F_1$ = 40.0\%). Aunque identific\'o correctamente las transgresiones de capacidades ($\Pi_1$) y l\'imites de argumentos ($\Pi_2$), fue incapaz de detectar inversiones de precedencia ($\Pi_3$), deriva de prompts ($P_1\text{--}P_3$) y corrupci\'on de memoria ($M_1\text{--}M_3$), las cuales representaron el 75\% del corpus an\'omalo.
+    \item \textbf{Efectividad Determinista de \textsc{AgentArch} ($B_{\text{prop}}$):} \textsc{AgentArch} detect\'o el 100\% de las 40 anomal\'ias inyectadas sin generar falsos positivos en los 10 escenarios nominales (Precisi\'on = 100.0\%, Recall = 100.0\%, $F_1$ = 100.0\%). Asimismo, logr\'o una exactitud perfecta en la localizaci\'on del primer paso infractor ($t^*$ Accuracy = 100.0\%), identificando el instante temporal exacto de la primera transgresi\'on.
+    \item \textbf{Sobrecarga Temporal Despreciable ($\Delta \mu$s):} Como refleja la Tabla~\ref{tab:latency_bench}, la ejecuci\'on de los chequeos deterministas introduce una latencia media de apenas $1.65\;\mu$s por tramo ($2.64\;\mu$s en turnos de prompt, $0.74\;\mu$s en operaciones de memoria y $1.58\;\mu$s en invocaciones de herramientas). Frente a los tiempos t\'ipicos de inferencia de modelos de lenguaje (que oscilan entre 200~ms y 3,000~ms), la sobrecarga de verificaci\'on de \textsc{AgentArch} es del orden del 0.001\%, confirmando su plena viabilidad operacional en entornos productivos.
+\end{enumerate}
+
+\section{Amenazas a la Validez}
+
+\subsection{Validez de Constructo}
+La principal amenaza radica en si la tupla $B = \langle P, M, \Pi \rangle$ captura adecuadamente el espectro de deriva en sistemas multi-agente. Para mitigarla, derivamos la taxonom\'ia a partir de la s\'intesis sistem\'atica de 26 art\'iculos y mapeamos formalmente cuatro de las dimensiones estructurales de Li et al.~\cite{li2026}. La exclusi\'on de la dimensi\'on de responsabilidad de la tupla interna $B$ se justifica metodol\'ogicamente debido a que la atribuci\'on de culpa requiere an\'alisis post-hoc sobre la traza consolidada y no condiciona la transici\'on at\'omica individual.
+
+\subsection{Validez Interna y Limitaci\'on del Agente Guionizado}
+Una amenaza cr\'itica concierne al uso de agentes guionizados deterministas en la evaluaci\'on. En este modo, \textbf{la detecci\'on de anomal\'ias resulta pr\'acticamente perfecta por construcci\'on}, dado que las transiciones siguen caminos previamente orquestados. Reconocemos expl\'icitamente esta propiedad: el modo guionizado constituye una \textbf{validaci\'on de la correcci\'on interna y sanidad matem\'atica de los algoritmos de verificaci\'on}, y de ninguna manera debe interpretarse como una prueba de generalizaci\'on conductual. La resistencia ante variaciones estoc\'asticas del lenguaje y la medici\'on fidedigna de falsos positivos en ejecuciones abiertas se delega al modo con modelo de pesos abiertos local.
+
+\subsection{Validez Externa}
+La evaluaci\'on se concentra en un sistema sint\'etico de atenci\'on de pedidos con tres roles y 50 escenarios anotados. Aunque este dominio cubre operaciones transaccionales representativas (triaje, consulta de inventario y pagos), las din\'amicas de negociaci\'on libre o di\'alogo abierto con humanos podr\'ian exhibir patrones de deriva m\'as sutiles que requieran ampliar el cat\'alogo de invariantes.
+
+\section{Conclusiones y Trabajo Futuro}
+En este art\'iculo hemos presentado las bases te\'oricas y operacionales de \textsc{AgentArch}, un marco de chequeo de conformidad y observabilidad para detectar deriva arquitect\'onica en sistemas multi-agente basados en LLMs. Al formalizar el espacio $B = \langle P, M, \Pi \rangle$ sobre cl\'ausulas versionadas con hash SHA-256, gobernanza de memoria determinista ($M_2$ y TTL) y reglas de precedencia operacional, el marco detecta violaciones en tiempo de ejecuci\'on mediante un procesador pasivo integrado transparentemente en OpenTelemetry sin alterar el flujo de decodificaci\'on de los modelos.
+
+La evaluaci\'on emp\'irica sobre un corpus de 50 escenarios confirma que \textsc{AgentArch} erradica la ceguera de la telemetr\'ia pasiva tradicional y supera la cobertura limitada de las reglas de contorno est\'aticas, manteniendo una sobrecarga media de $1.65\;\mu$s por operaci\'on.
+
+Como \textbf{trabajo futuro}, extenderemos el verificador hacia mecanismos de \emph{enforcement} activo que incluyan el bloqueo condicional de llamadas y la reparaci\'on din\'amica de par\'ametros en vuelo. Asimismo, se explorar\'a la autoformalizaci\'on de manuales procedimentales mediante l\'ogica temporal lineal (LTL), la resoluci\'on de restricciones de argumentos v\'ia solucionadores SMT (Z3) fuera de l\'inea, y la incorporaci\'on de m\'odulos sem\'anticos basados en NLI para la reconciliaci\'on de memorias desacopladas.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
