@@ -1,0 +1,133 @@
+{
+  "total_scenarios": 50,
+  "metrics": {
+    "B1": {
+      "TP": 0,
+      "FP": 0,
+      "TN": 10,
+      "FN": 40,
+      "Precision": 0,
+      "Recall": 0,
+      "F1": 0,
+      "FPR": 0,
+      "tStarAcc": 0,
+      "avgUs": 5.08
+    },
+    "B2": {
+      "TP": 10,
+      "FP": 0,
+      "TN": 10,
+      "FN": 30,
+      "Precision": 100,
+      "Recall": 25,
+      "F1": 40,
+      "FPR": 0,
+      "tStarAcc": 25,
+      "avgUs": 12.66
+    },
+    "B_prop": {
+      "TP": 40,
+      "FP": 0,
+      "TN": 10,
+      "FN": 0,
+      "Precision": 100,
+      "Recall": 100,
+      "F1": 100,
+      "FPR": 0,
+      "tStarAcc": 100,
+      "avgUs": 50.04
+    }
+  },
+  "by_category": {
+    "B1": {
+      "Nominal": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 10,
+        "FN": 0,
+        "total": 10
+      },
+      "Prompt": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 0,
+        "FN": 12,
+        "total": 12
+      },
+      "Memory": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 0,
+        "FN": 14,
+        "total": 14
+      },
+      "Policy": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 0,
+        "FN": 14,
+        "total": 14
+      }
+    },
+    "B2": {
+      "Nominal": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 10,
+        "FN": 0,
+        "total": 10
+      },
+      "Prompt": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 0,
+        "FN": 12,
+        "total": 12
+      },
+      "Memory": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 0,
+        "FN": 14,
+        "total": 14
+      },
+      "Policy": {
+        "TP": 10,
+        "FP": 0,
+        "TN": 0,
+        "FN": 4,
+        "total": 14
+      }
+    },
+    "B_prop": {
+      "Nominal": {
+        "TP": 0,
+        "FP": 0,
+        "TN": 10,
+        "FN": 0,
+        "total": 10
+      },
+      "Prompt": {
+        "TP": 12,
+        "FP": 0,
+        "TN": 0,
+        "FN": 0,
+        "total": 12
+      },
+      "Memory": {
+        "TP": 14,
+        "FP": 0,
+        "TN": 0,
+        "FN": 0,
+        "total": 14
+      },
+      "Policy": {
+        "TP": 14,
+        "FP": 0,
+        "TN": 0,
+        "FN": 0,
+        "total": 14
+      }
+    }
+  }
+}

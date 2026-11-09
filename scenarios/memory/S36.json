@@ -1,0 +1,38 @@
+{
+  "id": "S36",
+  "category": "Memory",
+  "operator": "M3",
+  "expected_drift": true,
+  "first_step": 2,
+  "desc": "M3: Consumo de reserva temporal caducada en memoria",
+  "expectedDrift": true,
+  "expectedStep": 2,
+  "spans": [
+    {
+      "name": "agentarch.memory_op",
+      "span_id": "S36_s1",
+      "trace_id": "trace_S36",
+      "step": 1,
+      "attr": {
+        "agentarch.memory.op": "write",
+        "agentarch.memory.key": "session_token",
+        "agentarch.memory.new_value": "TOKEN_ABC",
+        "agentarch.memory.timestamp": 1700000000000,
+        "agentarch.memory.ttl": 10000,
+        "agentarch.memory.verified": true,
+        "agentarch.memory.authorized_replacement": false
+      }
+    },
+    {
+      "name": "agentarch.memory_op",
+      "span_id": "S36_s2",
+      "trace_id": "trace_S36",
+      "step": 2,
+      "attr": {
+        "agentarch.memory.op": "read",
+        "agentarch.memory.key": "session_token",
+        "agentarch.memory.timestamp": 1700000025000
+      }
+    }
+  ]
+}

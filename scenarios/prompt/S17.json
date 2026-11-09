@@ -1,0 +1,33 @@
+{
+  "id": "S17",
+  "category": "Prompt",
+  "operator": "P2",
+  "expected_drift": true,
+  "first_step": 1,
+  "desc": "P2: Conflicto entre política de exclusión y política abierta",
+  "expectedDrift": true,
+  "expectedStep": 1,
+  "spans": [
+    {
+      "name": "agentarch.agent_turn",
+      "span_id": "S17_s1",
+      "trace_id": "trace_S17",
+      "step": 1,
+      "attr": {
+        "agentarch.agent.id": "BillingAgent",
+        "agentarch.prompt.active_clause_ids": [
+          "clause_financial_audit",
+          "clause_warranty_terms",
+          "clause_no_refund",
+          "clause_unconditional_refund"
+        ],
+        "agentarch.prompt.active_clause_hashes": [
+          "f4f9c6b2b98108d4451a48550d46389ad8b20b395115cb07fe18501a1a64f153",
+          "86461f61f5251b4223fcc0ad251dc003dd1fd3b99a7af82ac2a16174e1a1055d",
+          "271812c3ac0b705c0d89eead9e0fdf2d62d8a29ef7a92f52ca32a646d252b537",
+          "421d4b890f0311708a5d9121c4aed1974630f4a5feccc58b3dfef7a420a2c631"
+        ]
+      }
+    }
+  ]
+}

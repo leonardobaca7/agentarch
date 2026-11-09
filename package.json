@@ -1,0 +1,24 @@
+{
+  "name": "agentarch",
+  "version": "0.1.0",
+  "description": "Runtime Architectural Drift Detection and Conformance Checking for LLM Multi-Agent Systems via OpenTelemetry Traces",
+  "main": "src/agentarch/index.js",
+  "scripts": {
+    "test": "node experiments/run_evaluation.js",
+    "eval": "node experiments/run_evaluation.js",
+    "bench": "node experiments/benchmark_latency.js"
+  },
+  "keywords": [
+    "multi-agent-systems",
+    "llm",
+    "runtime-verification",
+    "opentelemetry",
+    "architectural-drift"
+  ],
+  "author": "Leonardo Baca Calsin & German Arturo Chipana Jeronimo (UNSA)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leonardobaca7/agentarch.git"
+  }
+}

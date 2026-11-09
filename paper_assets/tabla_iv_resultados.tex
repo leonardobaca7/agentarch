@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\caption{Matriz de Resultados Experimentales Cuantitativos ($B_1$ vs $B_2$ vs $B_{\text{prop}}$ sobre 50 Escenarios)}
+\label{tab:experimental_results}
+\centering
+\scriptsize
+\begin{tabularx}{\textwidth}{lcccccccccc}
+\toprule
+\multirow{2}{*}{\textbf{Configuraci\'on}} & \textbf{Nominal} & \multicolumn{2}{c}{\textbf{Prompt (12 esc.)}} & \multicolumn{2}{c}{\textbf{Memoria (14 esc.)}} & \multicolumn{2}{c}{\textbf{Pol\'iticas (14 esc.)}} & \multicolumn{3}{c}{\textbf{Evaluaci\'on Global}} \\
+\cmidrule(lr){2-2} \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-11}
+& \textbf{FPR (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Precisi\'on} & \textbf{Recall} & \textbf{$F_1$-Score} & \textbf{$t^*$ Acc.} & \textbf{Latencia Media} \\
+\midrule
+\textbf{L\'inea Base $B_1$ (Pasiva OTel)} & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & $2.60\;\mu$s \\
+\textbf{L\'inea Base $B_2$ (AgentSpec)} & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 71.4\% & 83.3\% & 100.0\% & 25.0\% & 40.0\% & 25.0\% & $30.97\;\mu$s \\
+\textbf{Propuesto $B_{\text{prop}}$ (\textsc{AgentArch})} & \textbf{0.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & $\mathbf{38.14\;\mu}$\textbf{s} \\
+\bottomrule
+\end{tabularx}
+\end{table*}

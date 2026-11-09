@@ -1,0 +1,145 @@
+# Especificación Arquitectónica Formal de Comportamiento: B = <P, M, Pi>
+# Sistema Sujeto: Agente Sintético de Soporte de Pedidos de Comercio Electrónico
+system_name: "Customer Order Support Multi-Agent System"
+version: "1.0.0"
+telemetry_namespace: "agentarch"
+
+roles:
+  - id: "OrderTriage"
+    description: "Analiza la solicitud inicial del cliente, extrae intenciones y delega a las entidades pertinentes."
+  - id: "InventoryAgent"
+    description: "Verifica inventario en bodega, consulta el estado de envíos y reserva unidades de reemplazo."
+  - id: "BillingAgent"
+    description: "Calcula notas de crédito, verifica términos de garantía y autoriza reembolsos financieros."
+
+# -------------------------------------------------------------
+# 1. Espacio de Prompts (P): Cláusulas con Resumen Criptográfico SHA-256
+# -------------------------------------------------------------
+prompt_specification:
+  roles:
+    OrderTriage:
+      required_clause_ids:
+        - "clause_auth"
+        - "clause_scope_triage"
+      clauses:
+        clause_auth:
+          text: "CANONICAL_AUTH: Verificar identidad del usuario antes de proceder."
+          sha256: "b620cf4a85fa0df2a7fc1cff8e1d5300057dc6be1ceb56fba11b816aa9f9a46c"
+        clause_scope_triage:
+          text: "CANONICAL_SCOPE: Limitar acciones a consulta y enrutamiento."
+          sha256: "e75127027ae4db919ae1a011030e4604eec4867df3c4bc153245084920263f35"
+
+    InventoryAgent:
+      required_clause_ids:
+        - "clause_inventory_lock"
+      clauses:
+        clause_inventory_lock:
+          text: "CANONICAL_INV: Bloquear stock exclusivamente con ID de orden valido."
+          sha256: "a0953a7f7d1efd880d829497e415fb278a2e7c95e1eb2a05d8bc1ea7684074b7"
+
+    BillingAgent:
+      required_clause_ids:
+        - "clause_financial_audit"
+        - "clause_warranty_terms"
+      clauses:
+        clause_financial_audit:
+          text: "CANONICAL_FIN: Registrar ID de auditoria en toda transaccion."
+          sha256: "e722513f59997fbf490c4ee8ee07fdfaa48e02d3856eb1a3c7ef2f20e895ec25"
+        clause_warranty_terms:
+          text: "CANONICAL_WARRANTY: Limitar reembolsos segun la politica de garantia."
+          sha256: "f460492cb91316b23f545fa67ea307e59b2075b9f7a77d8536b53982df4bcfd6"
+
+  conflict_matrix:
+    - pair: ["clause_no_refund", "clause_unconditional_refund"]
+      reason: "Contradicción entre prohibición absoluta de reembolso y política incondicional."
+    - pair: ["clause_strict_audit", "clause_bypass_audit"]
+      reason: "Contradicción entre auditoría financiera obligatoria y excepción de auditoría."
+
+# -------------------------------------------------------------
+# 2. Espacio de Memoria Gobernado (M)
+# -------------------------------------------------------------
+memory_specification:
+  default_ttl_ms: 60000 # 60 segundos por defecto
+  require_verified_admission: true # M1: Admisión condicionada a soporte empírico en la traza
+  enforce_non_destructive_overwrite: true # M2: Sobrescritura requiere authorized_replacement = true
+  ttl_enforcement: "deterministic_timestamp" # M3: Computado a partir de marcas temporales en la traza
+
+# -------------------------------------------------------------
+# 3. Espacio de Políticas e Invariantes (Pi)
+# -------------------------------------------------------------
+policy_specification:
+  capabilities:
+    OrderTriage:
+      - "lookup_order"
+      - "check_customer_status"
+      - "route_to_agent"
+    InventoryAgent:
+      - "verify_inventory"
+      - "reserve_stock"
+      - "release_stock"
+      - "check_shipping_status"
+    BillingAgent:
+      - "calculate_refund"
+      - "process_payment"
+      - "issue_credit_note"
+
+  argument_rules:
+    lookup_order:
+      order_id:
+        type: "string"
+        pattern: "^ORD-\\d{4,6}$"
+    check_customer_status:
+      customer_id:
+        type: "string"
+    route_to_agent:
+      target_agent:
+        type: "string"
+        enum: ["InventoryAgent", "BillingAgent"]
+    verify_inventory:
+      sku:
+        type: "string"
+      quantity:
+        type: "integer"
+        min: 1
+    reserve_stock:
+      sku:
+        type: "string"
+      quantity:
+        type: "integer"
+        min: 1
+        max: 100
+    release_stock:
+      sku:
+        type: "string"
+      quantity:
+        type: "integer"
+        min: 1
+    calculate_refund:
+      order_id:
+        type: "string"
+      amount:
+        type: "number"
+        min: 0.0
+        max: 1000.0
+    process_payment:
+      order_id:
+        type: "string"
+      amount:
+        type: "number"
+        min: 0.01
+        max: 1000.0
+    issue_credit_note:
+      order_id:
+        type: "string"
+      amount:
+        type: "number"
+        min: 0.01
+        max: 500.0
+
+  precedences:
+    - prerequisite: "verify_inventory"
+      target: "reserve_stock"
+      description: "Pi3: reserve_stock no puede invocarse sin haber completado exitosamente verify_inventory."
+    - prerequisite: "calculate_refund"
+      target: "process_payment"
+      description: "Pi3: process_payment no puede ejecutarse sin un cálculo previo del monto de reembolso."

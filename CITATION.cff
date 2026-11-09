@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use AgentArch or this benchmark in your research, please cite our paper."
+title: "AgentArch: Runtime Architectural Drift Detection in LLM Multi-Agent Systems via Conformance Checking over Traces"
+authors:
+  - family-names: "Baca Calsin"
+    given-names: "Leonardo"
+    affiliation: "Universidad Nacional de San Agustín de Arequipa (UNSA)"
+    email: "lbacac@unsa.edu.pe"
+  - family-names: "Chipana Jeronimo"
+    given-names: "German Arturo"
+    affiliation: "Universidad Nacional de San Agustín de Arequipa (UNSA)"
+    email: "gchipanaj@unsa.edu.pe"
+version: 0.1.0
+date-released: 2026-11-09
+url: "https://github.com/leonardobaca7/agentarch"
+repository-code: "https://github.com/leonardobaca7/agentarch"
+keywords:
+  - "multi-agent systems"
+  - "large language models"
+  - "architectural drift"
+  - "runtime verification"
+  - "conformance checking"
+  - "opentelemetry"

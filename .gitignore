@@ -20,6 +20,9 @@ papers/
 papers_CS.zip
 *.pdf.bak
 
+# Paper source files (maintained locally for submission, not part of public code artifact)
+latex/
+
 # Operating System & IDE junk
 .DS_Store
 Thumbs.db

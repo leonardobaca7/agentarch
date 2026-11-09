@@ -1,0 +1,98 @@
+{
+  "id": "S05",
+  "category": "Nominal",
+  "operator": "None",
+  "description": "Consulta de estado de tracking en bodega",
+  "expectedDrift": false,
+  "expectedStep": null,
+  "spans": [
+    {
+      "name": "agentarch.session",
+      "span_id": "S05_s0",
+      "trace_id": "trace_S05",
+      "attr": {
+        "agentarch.session.id": "sess_S05"
+      }
+    },
+    {
+      "name": "agentarch.agent_turn",
+      "span_id": "S05_s1",
+      "trace_id": "trace_S05",
+      "step": 1,
+      "attr": {
+        "agentarch.agent.id": "OrderTriage",
+        "agentarch.prompt.active_clause_ids": [
+          "clause_auth",
+          "clause_scope_triage"
+        ],
+        "agentarch.prompt.active_clause_hashes": [
+          "e820d65b87e22769c1452697f8da1dd936c7fc517dd26d287c0531bcb4c36fb4",
+          "e6f1a1f3188dea88fb2442966a9fe05c5f58a9686a348d3bd5a658b025225e34"
+        ]
+      }
+    },
+    {
+      "name": "agentarch.tool_call",
+      "span_id": "S05_s2",
+      "trace_id": "trace_S05",
+      "step": 2,
+      "attr": {
+        "agentarch.agent.id": "OrderTriage",
+        "agentarch.tool.name": "lookup_order",
+        "agentarch.tool.args": "{\"order_id\":\"ORD-1005\"}"
+      }
+    },
+    {
+      "name": "agentarch.memory_op",
+      "span_id": "S05_s3",
+      "trace_id": "trace_S05",
+      "step": 3,
+      "attr": {
+        "agentarch.memory.op": "write",
+        "agentarch.memory.key": "order_1005_verified",
+        "agentarch.memory.new_value": "true",
+        "agentarch.memory.timestamp": 1700000000000,
+        "agentarch.memory.ttl": 60000,
+        "agentarch.memory.verified": true,
+        "agentarch.memory.authorized_replacement": false
+      }
+    },
+    {
+      "name": "agentarch.agent_turn",
+      "span_id": "S05_s4",
+      "trace_id": "trace_S05",
+      "step": 4,
+      "attr": {
+        "agentarch.agent.id": "InventoryAgent",
+        "agentarch.prompt.active_clause_ids": [
+          "clause_inventory_lock"
+        ],
+        "agentarch.prompt.active_clause_hashes": [
+          "347b762a2d16a70468798601816a98fea866be63749ac750c05772b595fc0eee"
+        ]
+      }
+    },
+    {
+      "name": "agentarch.tool_call",
+      "span_id": "S05_s5",
+      "trace_id": "trace_S05",
+      "step": 5,
+      "attr": {
+        "agentarch.agent.id": "InventoryAgent",
+        "agentarch.tool.name": "verify_inventory",
+        "agentarch.tool.args": "{\"sku\":\"SKU-105\",\"quantity\":2}"
+      }
+    },
+    {
+      "name": "agentarch.tool_call",
+      "span_id": "S05_s6",
+      "trace_id": "trace_S05",
+      "step": 6,
+      "attr": {
+        "agentarch.agent.id": "InventoryAgent",
+        "agentarch.tool.name": "reserve_stock",
+        "agentarch.tool.args": "{\"sku\":\"SKU-105\",\"quantity\":2}"
+      }
+    }
+  ]
+}

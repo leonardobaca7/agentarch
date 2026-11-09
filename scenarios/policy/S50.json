@@ -1,0 +1,38 @@
+{
+  "id": "S50",
+  "category": "Policy",
+  "operator": "Pi3",
+  "expected_drift": true,
+  "first_step": 2,
+  "desc": "Pi3: Desembolso financiero ejecutado sin cálculo de garantía previo",
+  "expectedDrift": true,
+  "expectedStep": 2,
+  "spans": [
+    {
+      "name": "agentarch.agent_turn",
+      "span_id": "S50_s1",
+      "trace_id": "trace_S50",
+      "step": 1,
+      "attr": {
+        "agentarch.agent.id": "InventoryAgent",
+        "agentarch.prompt.active_clause_ids": [
+          "clause_inventory_lock"
+        ],
+        "agentarch.prompt.active_clause_hashes": [
+          "347b762a2d16a70468798601816a98fea866be63749ac750c05772b595fc0eee"
+        ]
+      }
+    },
+    {
+      "name": "agentarch.tool_call",
+      "span_id": "S50_s2",
+      "trace_id": "trace_S50",
+      "step": 2,
+      "attr": {
+        "agentarch.agent.id": "InventoryAgent",
+        "agentarch.tool.name": "reserve_stock",
+        "agentarch.tool.args": "{\"sku\":\"SKU-777\",\"quantity\":5}"
+      }
+    }
+  ]
+}

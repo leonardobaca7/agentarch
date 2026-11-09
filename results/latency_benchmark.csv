@@ -1,0 +1,5 @@
+span_type,evaluated_operators,mean_latency_us,std_dev_us,sample_size
+agentarch.agent_turn,"P1, P2, P3 (Prompt clauses / SHA-256)",1.13,0.12,50000
+agentarch.memory_op,"M1, M2, M3 (Admission, Overwrite, TTL)",0.55,0.05,50000
+agentarch.tool_call,"Pi1, Pi2, Pi3 (Capabilities, Bounds, Order)",1.41,0.08,50000
+weighted_average,"Full verification cycle per span",1.03,0.08,50000

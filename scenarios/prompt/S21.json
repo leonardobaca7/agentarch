@@ -1,0 +1,29 @@
+{
+  "id": "S21",
+  "category": "Prompt",
+  "operator": "P3",
+  "expected_drift": true,
+  "first_step": 1,
+  "desc": "P3: Mutación de texto de directiva de autenticación con hash alterado",
+  "expectedDrift": true,
+  "expectedStep": 1,
+  "spans": [
+    {
+      "name": "agentarch.agent_turn",
+      "span_id": "S21_s1",
+      "trace_id": "trace_S21",
+      "step": 1,
+      "attr": {
+        "agentarch.agent.id": "BillingAgent",
+        "agentarch.prompt.active_clause_ids": [
+          "clause_financial_audit",
+          "clause_warranty_terms"
+        ],
+        "agentarch.prompt.active_clause_hashes": [
+          "f4f9c6b2b98108d4451a48550d46389ad8b20b395115cb07fe18501a1a64f153",
+          "a8f2dbbdd4f0b2745c102343d0f3583b1f663660168311bf91a5e0624b28de6e"
+        ]
+      }
+    }
+  ]
+}
