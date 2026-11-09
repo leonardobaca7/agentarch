@@ -422,7 +422,7 @@ Para ejecuciones en l\'inea, formulamos el procesador pasivo \texttt{AgentArchSp
 Como ilustra la Fig.~\ref{fig:flowchart}, el procesador inspecciona los atributos normalizados del tramo, eval\'ua los operadores de deriva pertinentes y, ante cualquier transgresi\'on detectada, sintetiza un evento de violaci\'on estructurado $\mathcal{E} = \langle \text{trace\_id}, \text{span\_id}, t^*, \text{"DRIFT\_DETECTED"}, \mathcal{V} \rangle$. Dicho evento se encola de forma estrictamente as\'incrona en la cola de auditor\'ia $\mathcal{Q}_{\text{audit}}$. En ning\'un caso el monitor bloquea, retrasa, cancela o reescribe la decodificaci\'on ni las acciones de los agentes.
 
 \subsection{Disponibilidad del C\'odigo y Reproducibilidad}
-Con el prop\'osito de facilitar la reproducibilidad total y la verificaci\'on independiente de los resultados, la implementaci\'on de referencia ejecutable tanto del verificador por lotes como del procesador pasivo en streaming \texttt{AgentArchSpanProcessor}, junto con el arn\'es de prueba y los 50 escenarios controlados, est\'an disponibles abiertamente en el repositorio p\'ublico del proyecto.
+Con el prop\'osito de facilitar la reproducibilidad total y la verificaci\'on independiente de los resultados, la implementaci\'on de referencia ejecutable tanto del verificador por lotes como del procesador pasivo en streaming \texttt{AgentArchSpanProcessor}, junto con el arn\'es de prueba y los 50 escenarios controlados, est\'an disponibles abiertamente en el repositorio p\'ublico del proyecto: \url{https://github.com/leonardobaca7/agentarch}.
 
 \begin{figure}[t]
 \centering
