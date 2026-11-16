@@ -7,8 +7,8 @@
 
 Official reference implementation and companion research artifact for the paper:
 
-> **"Detección de Deriva Arquitectónica en Sistemas Multi-Agente Basados en Modelos de Lenguaje mediante Chequeo de Conformidad sobre Trazas"**  
-> *Leonardo Baca Calsin & German Arturo Chipana Jeronimo*  
+> **"Detección de Deriva Arquitectónica en Sistemas Multi-Agente Basados en Modelos de Lenguaje mediante Chequeo de Conformidad sobre Trazas"**
+> *Leonardo Baca Calsin & German Arturo Chipana Jeronimo*
 > Departamento de Ingeniería de Sistemas e Informática, Universidad Nacional de San Agustín de Arequipa (UNSA), Arequipa, Perú.
 
 ---
@@ -34,7 +34,7 @@ Los sistemas multi-agente (MAS) basados en modelos de lenguaje de gran escala (L
 * **Espacio de Comportamiento $B = \langle P, M, \Pi \rangle$:** Modela formalmente directivas de prompt versionadas criptográficamente con SHA-256 ($P$), estados de memoria gobernados deterministamente ($M$) y reglas de precedencia causal entre herramientas ($\Pi$).
 * **Taxonomía de 9 Operadores de Deriva:** Detecta supresión obligatoria ($P_1$), inyección de conflicto ($P_2$), alteración criptográfica ($P_3$), admisión no verificada ($M_1$), sobrescritura destructiva ($M_2$), lecturas caducadas por TTL ($M_3$), herramientas no permitidas ($\Pi_1$), límites de argumentos ($\Pi_2$) e inversiones de precedencia ($\Pi_3$).
 * **Monitor Pasivo Streaming (`AgentArchSpanProcessor`):** Intercepta tramos en `on_end(span)` y emite alertas estructuradas a una cola de auditoría asíncrona ($\mathcal{Q}_{\text{audit}}$) sin suspender, bloquear ni reescribir la inferencia del modelo.
-* **Sobrecarga Despreciable:** Introduce una latencia media de apenas **$1.65\;\mu$s** por tramo ($\approx 0.001\%$ del tiempo de inferencia de un LLM).
+* **Microbenchmark del verificador:** mide llamadas directas a onEnd sobre tramos sintéticos conformes. Los resultados y el entorno están en results/.
 
 ---
 
@@ -91,43 +91,59 @@ agentarch/
 
 ---
 
-## 🔬 Resultados Cuantitativos Consolidados
+## Evaluación guionizada
 
-Evaluación sobre los **50 escenarios** del agente de pedidos en modo guionizado determinista:
+El ejecutor JavaScript entrega trazas sintéticas al verificador. Los 50 escenarios cubren
+un flujo nominal y nueve patrones de deriva con repeticiones por patrón. El ejecutor
+usa scenarios/scenario_loader.js y scenarios/ground_truth.json. Las configuraciones
+de comparación son un detector de HTTP >= 500 (B1) y reglas de capacidades y argumentos
+inspiradas en AgentSpec (B2).
 
-| Configuración | Nominal (10 esc.)<br>FPR (%) | Prompt (12 esc.)<br>Recall / F1 (%) | Memoria (14 esc.)<br>Recall / F1 (%) | Políticas (14 esc.)<br>Recall / F1 (%) | Precisión Global | Exhaustividad (Recall) | $F_1$-Score Global | Exactitud $t^*$ ($t^*$ Acc) | Latencia Media |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$B_1$ (Pasiva OTel)** | 0.0% | 0.0% / 0.0% | 0.0% / 0.0% | 0.0% / 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | $2.60\;\mu$s |
-| **$B_2$ (AgentSpec)** | 0.0% | 0.0% / 0.0% | 0.0% / 0.0% | 71.4% / 83.3% | 100.0% | 25.0% | 40.0% | 25.0% | $30.97\;\mu$s |
-| **$B_{\text{prop}}$ (\textsc{AgentArch})** | **0.0%** | **100.0% / 100.0%** | **100.0% / 100.0%** | **100.0% / 100.0%** | **100.0%** | **100.0%** | **100.0%** | **100.0%** | **$38.14\;\mu$s** |
+| Configuración | Derivas detectadas | Alertas en nominales | Precisión | Exhaustividad | F1 | Exactitud del primer paso |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| B1 | 0/40 | 0/10 | — | 0 % | 0 % | 0 % |
+| B2 | 10/40 | 0/10 | 100 % | 25 % | 40 % | 25 % |
+| AgentArch | 40/40 | 0/10 | 100 % | 100 % | 100 % | 100 % |
 
-### ⏱️ Caracterización de Sobrecarga Temporal ($N=50,000$ muestras)
+La exactitud del primer paso usa los 40 casos con deriva como denominador.
+La precisión de B1 es indefinida por ausencia de alertas. El JSON conserva 0
+como convención de exportación.
 
-| Tipo de Tramo OpenTelemetry | Operadores Evaluados | Latencia Media ($\mu$s) | Desv. Est. ($\mu$s) |
-| :--- | :--- | :---: | :---: |
-| `agentarch.agent_turn` | $P_1, P_2, P_3$ (Prompt/SHA-256) | 1.98 | $\pm 0.12$ |
-| `agentarch.memory_op` | $M_1, M_2, M_3$ (Admisión, TTL) | 0.82 | $\pm 0.05$ |
-| `agentarch.tool_call` | $\Pi_1, \Pi_2, \Pi_3$ (Args y Orden) | 2.46 | $\pm 0.08$ |
-| **Promedio Ponderado** | **Ciclo completo por tramo** | **1.75** | $\mathbf{\pm 0.08}$ |
+### Latencia del verificador
+
+50 lotes de 1 000 llamadas cronometradas por tipo, con calentamiento.
+Cada observación es el tiempo medio por llamada de un lote. Se informa la media
+y la desviación estándar muestral de esas 50 observaciones.
+
+| Tramo | Media (µs) | DE entre lotes (µs) |
+| --- | ---: | ---: |
+| Turno | 0.189 | 0.218 |
+| Memoria | 0.079 | 0.052 |
+| Herramienta | 0.582 | 0.157 |
+
+La ejecución versionada se realizó con Node.js 22.15.0 en Windows x64, Intel Core
+i7-1165G7. El commit, el entorno y los 50 valores por tipo están en
+[latency_run.json](results/latency_run.json). El microbenchmark mide el núcleo
+sobre entradas conformes, con hashes preparados, y excluye la ejecución de un LLM,
+la exportación de telemetría y el consumo de alertas. Se retiró de la evaluación
+la comparación de tiempos por escenario debido a los distintos criterios de parada.
+
+El [artículo en LaTeX](paper/articulo.tex) utiliza IEEEtran en modo conferencia
+y carga las tablas generadas desde paper_assets/. Desde el directorio paper,
+compilar con pdflatex articulo.tex dos veces para resolver las referencias cruzadas.
 
 ---
 
 ## 👥 Autores y Contacto
 
-* **Leonardo Baca Calsin** (`lbacac@unsa.edu.pe`)  
+* **Leonardo Baca Calsin** (`lbacac@unsa.edu.pe`)
   *Universidad Nacional de San Agustín de Arequipa (UNSA)*, Arequipa, Perú.
-* **German Arturo Chipana Jeronimo** (`gchipanaj@unsa.edu.pe`)  
+* **German Arturo Chipana Jeronimo** (`gchipanaj@unsa.edu.pe`)
   *Universidad Nacional de San Agustín de Arequipa (UNSA)*, Arequipa, Perú.
 
 ---
 
-## 📜 Citación
+## Citación
 
-```bibtex
-@inproceedings{baca2026agentarch,
-  author    = {Baca Calsin, Leonardo and Chipana Jeronimo, German Arturo},
-  title     = {Detecci{\'o}n de Deriva Arquitect{\'o}nica en Sistemas Multi-Agente Basados en Modelos de Lenguaje mediante Chequeo de Conformidad sobre Trazas},
-  booktitle = {Actas del Congreso de Ingenier{\'i}a de Software},
-  year      = {2026}
-}
-```
+El manuscrito de AgentArch está en preparación. Los metadatos del software se
+encuentran en [CITATION.cff](CITATION.cff).

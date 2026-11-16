@@ -1,17 +1,28 @@
-\begin{table*}[t]
-\caption{Matriz de Resultados Experimentales Cuantitativos ($B_1$ vs $B_2$ vs $B_{\text{prop}}$ sobre 50 Escenarios)}
+\begin{table}[!t]
+\caption{Casos detectados por dimensión}
+\label{tab:category_results}
+\centering\footnotesize
+\begin{tabular}{lrrr}
+\hline
+Variante & Prompts & Memoria & Políticas\\
+\hline
+$B_1$ & 0/12 & 0/14 & 0/14\\
+$B_2$ & 0/12 & 0/14 & 10/14\\
+AgentArch & 12/12 & 14/14 & 14/14\\
+\hline
+\end{tabular}
+\end{table}
+\begin{table}[!t]
+\caption{Resultados globales (métricas en \%)}
 \label{tab:experimental_results}
-\centering
-\scriptsize
-\begin{tabularx}{\textwidth}{lcccccccccc}
-\toprule
-\multirow{2}{*}{\textbf{Configuraci\'on}} & \textbf{Nominal} & \multicolumn{2}{c}{\textbf{Prompt (12 esc.)}} & \multicolumn{2}{c}{\textbf{Memoria (14 esc.)}} & \multicolumn{2}{c}{\textbf{Pol\'iticas (14 esc.)}} & \multicolumn{3}{c}{\textbf{Evaluaci\'on Global}} \\
-\cmidrule(lr){2-2} \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-11}
-& \textbf{FPR (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Recall (\%)} & \textbf{$F_1$ (\%)} & \textbf{Precisi\'on} & \textbf{Recall} & \textbf{$F_1$-Score} & \textbf{$t^*$ Acc.} & \textbf{Latencia Media} \\
-\midrule
-\textbf{L\'inea Base $B_1$ (Pasiva OTel)} & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & $2.60\;\mu$s \\
-\textbf{L\'inea Base $B_2$ (AgentSpec)} & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 0.0\% & 71.4\% & 83.3\% & 100.0\% & 25.0\% & 40.0\% & 25.0\% & $30.97\;\mu$s \\
-\textbf{Propuesto $B_{\text{prop}}$ (\textsc{AgentArch})} & \textbf{0.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & \textbf{100.0\%} & $\mathbf{38.14\;\mu}$\textbf{s} \\
-\bottomrule
-\end{tabularx}
-\end{table*}
+\centering\footnotesize
+\begin{tabular}{lrrrrrrr}
+\hline
+Variante & VP & FP & FN & Prec. & Exh. & $F_1$ & $t^*$\\
+\hline
+$B_1$ & 0 & 0 & 40 & -- & 0 & 0 & 0\\
+$B_2$ & 10 & 0 & 30 & 100 & 25 & 40 & 25\\
+AgentArch & 40 & 0 & 0 & 100 & 100 & 100 & 100\\
+\hline
+\end{tabular}
+\end{table}

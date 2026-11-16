@@ -1,17 +1,13 @@
-\begin{table}[t]
-\caption{Sobrecarga de Latencia por Tipo de Tramo ($\Delta \mu$s, $N=50,000$ Muestras)}
+\begin{table}[!t]
+\caption{Tiempo de verificación por tramo ($\mu$s)}
 \label{tab:latency_bench}
-\centering
-\scriptsize
-\begin{tabularx}{\columnwidth}{Xlrr}
-\toprule
-\textbf{Tramo OpenTelemetry} & \textbf{Operadores} & \textbf{Media} & \textbf{Desv.} \\
-\midrule
-\texttt{agentarch.agent\_turn} & $P_1\text{--}P_3$ & 1.13\;\mu$s & $\pm 0.12$ \\
-\texttt{agentarch.memory\_op} & $M_1\text{--}M_3$ & 0.55\;\mu$s & $\pm 0.05$ \\
-\texttt{agentarch.tool\_call} & $\Pi_1\text{--}\Pi_3$ & 1.41\;\mu$s & $\pm 0.08$ \\
-\midrule
-\textbf{Promedio Ponderado} & \textbf{Ciclo completo} & \textbf{1.03\;\mu}\textbf{s} & $\mathbf{\pm 0.08}$ \\
-\bottomrule
-\end{tabularx}
+\centering\footnotesize
+\begin{tabular}{lrr}
+\hline
+Tramo & Media & DE entre lotes\\\hline
+Turno & 0.189 & 0.218\\
+Memoria & 0.079 & 0.052\\
+Herramienta & 0.582 & 0.157\\
+\hline
+\end{tabular}
 \end{table}

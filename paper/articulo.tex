@@ -1,0 +1,177 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-nodecimaldot,es-tabla]{babel}
+\usepackage{amsmath}
+\usepackage{url}
+
+\title{Detección de deriva arquitectónica en sistemas multiagente basados en modelos de lenguaje mediante chequeo de conformidad sobre trazas}
+\author{\IEEEauthorblockN{Leonardo Baca Calsin y German Arturo Chipana Jeronimo}
+\IEEEauthorblockA{Departamento de Ingeniería de Sistemas e Informática\\
+Universidad Nacional de San Agustín de Arequipa, Arequipa, Perú\\
+lbacac@unsa.edu.pe, gchipanaj@unsa.edu.pe}}
+\newcommand{\boxstep}[1]{\fbox{\strut\footnotesize #1}}
+\newcommand{\downstep}{\\[-1pt]$\downarrow$\\[-1pt]}
+\renewcommand{\IEEEkeywordsname}{Palabras clave}
+\newcommand{\arch}{\textsc{AgentArch}}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+En un sistema multiagente basado en modelos de lenguaje, una ejecución puede finalizar sin errores de transporte y aun así omitir directivas obligatorias, realizar escrituras de memoria sin respaldo o invocar herramientas fuera de la política del sistema. Presentamos \arch, un verificador pasivo que contrasta trazas con una especificación arquitectónica de prompts, memoria y políticas operacionales. Definimos nueve operadores de deriva y evaluamos el detector con 50 escenarios guionizados de soporte de pedidos. \arch{} detectó las 40 trazas con deriva, localizó el primer paso infractor en todos esos casos y emitió cero alertas en las 10 trazas nominales. Un detector de fallos HTTP identificó cero casos y una variante de reglas de herramientas inspirada en AgentSpec identificó diez. Un microbenchmark separado midió el tiempo del núcleo de verificación sobre tres tipos de tramo sintético conforme. Los resultados documentan la cobertura de las reglas en el corpus controlado.
+\end{abstract}
+\begin{IEEEkeywords}
+deriva arquitectónica, sistemas multiagente, modelos de lenguaje, chequeo de conformidad, trazas, OpenTelemetry
+\end{IEEEkeywords}
+
+\section{Introducción}
+Los sistemas multiagente basados en modelos de lenguaje (MAS-LLM) distribuyen tareas entre agentes con roles, memoria y herramientas especializadas. La arquitectura delimita el acceso a herramientas y el intercambio de conocimiento, aunque parte del comportamiento concreto se decide durante cada ejecución. Los patrones y metamodelos para estos sistemas ayudan a expresar esa estructura \cite{li,miranda,lu,liu,sallma}. Sin embargo, un registro de invocaciones exitosas puede contener una ejecución incompatible con el diseño.
+
+Denominamos \emph{deriva arquitectónica observable} a una divergencia entre los invariantes operacionales especificados y las transiciones registradas en la traza de una sesión. El chequeo sobre trazas ya se ha explorado para firmware \cite{deangelis}. En un MAS-LLM interesa, además del orden de las operaciones, preservar las directivas activas y las condiciones de admisión y vigencia de la memoria.
+
+Este trabajo aporta una especificación de comportamiento \(B=\langle P,M,\Pi\rangle\), una taxonomía de nueve operadores y una evaluación reproducible de un monitor pasivo. La unidad de evaluación es una sesión guionizada. Cada regla se aplica a los atributos observables del tramo al cerrarse. El monitor produce alertas de auditoría y la aplicación conserva el control de sus acciones.
+
+\section{Trabajos relacionados}
+La revisión estructurada se organizó en cinco ejes. La Tabla~\ref{tab:related} sitúa el trabajo respecto de los mecanismos que motivaron el diseño. El corpus documental proviene de la bibliografía del proyecto.
+
+\begin{table*}[!t]
+\caption{Ejes de la revisión de literatura}
+\label{tab:related}
+\centering\footnotesize
+\begin{tabular}{@{}p{.23\textwidth}p{.35\textwidth}p{.36\textwidth}@{}}
+\hline
+Eje & Trabajos & Relación con la propuesta\\\hline
+Arquitectura y diseño & Dimensiones, metamodelos, catálogos y arquitecturas \cite{li,miranda,lu,liu,sallma} & Identificación de roles, restricciones, conocimiento y evolución.\\
+Deriva y verificación & Trazas de firmware, contratos, reglas de herramientas, escudos y verificación de protocolos \cite{deangelis,contracts,agentspec,mcp,mentor,tracefix,pro2guard} & Contraste con un diseño esperado y delimitación del monitor pasivo.\\
+Observabilidad y traza & AgentOps, AgentTelemetry, instrumentación MAS, Watson, COMPASS, Pathfinder y análisis de trayectorias \cite{agentops,telemetry,faults,watson,compass,pathfinder,survey,barrak} & Evidencia registrada y diagnóstico de discrepancias.\\
+Prompts y memoria & Evolución de prompts, ClawVM, GovMem y MemArchitect \cite{prompts,claw,govmem,memarch} & Integridad de cláusulas, admisión, sobrescritura y expiración.\\
+Confianza y procedencia & TARV y TraceCaps \cite{tarv,tracecaps} & Evaluación de confianza y procedencia como enfoques complementarios.\\\hline
+\end{tabular}
+\end{table*}
+
+AgentSpec ofrece un mecanismo de reglas con disparadores, predicados y acciones \cite{agentspec}. En la evaluación usamos una variante propia que comprueba capacidades y argumentos. TraceFix analiza protocolos mediante modelos y contraejemplos \cite{tracefix}. Los modelos y contratos de aseguramiento \cite{contracts} motivan la separación entre la especificación y la evidencia de ejecución.
+
+La observabilidad proporciona los datos para el chequeo. AgentOps describe la estructura de las trazas de agentes \cite{agentops}, y AgentTelemetry y el trabajo de Seyedghorban et al.\ exploran instrumentación y evaluación de fallos \cite{telemetry,faults}. \arch{} usa atributos de dominio para decidir si una transición observada cumple una regla explícita. Los métodos de atribución de fallos y auditoría de procedencia complementan esa decisión \cite{survey,barrak,tracecaps}.
+
+\section{Modelo de comportamiento}
+Sea \(\tau=(s_1,\ldots,s_n)\) la secuencia de tramos observados de una sesión. La especificación \(B=\langle P,M,\Pi\rangle\) reúne las obligaciones de prompt, las reglas de memoria y las políticas de herramientas. Las restricciones y la evolución de los prompts se representan en \(P\); el conocimiento mutable, en \(M\); y el control operacional, en \(\Pi\). Esta organización se inspira en las dimensiones arquitectónicas de Li et al.\ \cite{li}. La asignación de responsabilidad puede analizarse posteriormente a partir de los eventos registrados.
+
+\begin{figure}[!t]
+\centering
+\boxstep{Agentes y herramientas de soporte de pedidos}
+\downstep
+\boxstep{Tramos normalizados de la sesión}
+\downstep
+\boxstep{Verificador pasivo \(\leftarrow\) especificación \(B\)}
+\downstep
+\boxstep{Cola de auditoría: eventos de infracción}
+\caption{Flujo de datos de \arch. La especificación alimenta el verificador y este encola las alertas.}
+\label{fig:arch}
+\end{figure}
+
+\begin{figure}[!t]
+\centering
+\begin{tabular}{ccc}
+\boxstep{\(P\) · Prompts} & \boxstep{\(M\) · Memoria} & \boxstep{\(\Pi\) · Políticas}\\[2pt]
+\footnotesize \(P_1\) Ausencia & \footnotesize \(M_1\) Admisión & \footnotesize \(\Pi_1\) Capacidad\\
+\footnotesize \(P_2\) Conflicto & \footnotesize \(M_2\) Reemplazo & \footnotesize \(\Pi_2\) Argumentos\\
+\footnotesize \(P_3\) Integridad & \footnotesize \(M_3\) Vigencia & \footnotesize \(\Pi_3\) Precedencia
+\end{tabular}
+\caption{Familias y operadores de deriva en \(B\).}
+\label{fig:taxonomy}
+\end{figure}
+
+\subsection{Cláusulas de prompt}
+Para un rol \(i\), sean \(R_i\) los identificadores obligatorios, \(A_i(s)\) los identificadores activos y \(h_i^0(c)\) el resumen SHA-256 canónico de la cláusula \(c\). El tramo declara \(h_s(c)\) para las cláusulas activas. \(P_1\) señala la ausencia de un elemento de \(R_i\). \(P_2\) señala la presencia conjunta de un par registrado en el conjunto de conflictos \(C\). \(P_3\) señala una discrepancia de resumen para un identificador con valor canónico. El resultado depende de que el instrumentador registre identificadores y resúmenes fieles a las cláusulas utilizadas.
+
+\subsection{Estado de memoria}
+El verificador mantiene un mapa de claves a valores, marcas temporales y períodos de vigencia (TTL). En una escritura, \(M_1\) comprueba la marca de verificación y \(M_2\) contrasta el nuevo valor con el valor registrado y la autorización de reemplazo. En una lectura de una clave conocida, \(M_3\) compara su antigüedad con el TTL. La marca de verificación es evidencia declarada por la aplicación. Su calidad depende del mecanismo que la produce \cite{govmem}.
+
+\subsection{Políticas de herramientas}
+Sea \(K_i\) el conjunto de herramientas permitidas para el rol \(i\), \(V_a\) el validador de argumentos para la herramienta \(a\), y \(D\) el conjunto de precedencias \((a,b)\). \(\Pi_1\) comprueba la pertenencia a \(K_i\) y \(\Pi_2\) exige que el validador aplicable acepte los argumentos. \(\Pi_3\) comprueba que la traza haya registrado \(a\) antes de \(b\). La implementación evaluada conserva un conjunto de nombres observados durante la sesión. La comprobación de éxito y la correlación por recurso requerirían atributos adicionales.
+
+\begin{table*}[!t]
+\caption{Reglas de violación y distribución del corpus guionizado}
+\label{tab:operators}
+\centering\footnotesize
+\begin{tabular}{@{}llp{.36\textwidth}p{.32\textwidth}r@{}}
+\hline
+Regla & IDs & Condición de violación & Patrón evaluado & Casos\\\hline
+-- & S01--S10 & Ninguna de las condiciones siguientes & Consulta y escritura válidas, verificación de stock antes de reserva & 10\\
+\(P_1\) & S11--S14 & \(R_i\setminus A_i(s)\neq\emptyset\) & Omisión de \texttt{clause\_auth} en OrderTriage & 4\\
+\(P_2\) & S15--S18 & \(\exists(c,d)\in C:\{c,d\}\subseteq A_i(s)\) & Dos cláusulas de reembolso excluyentes & 4\\
+\(P_3\) & S19--S22 & \(\exists c\in A_i(s)\cap\mathrm{dom}(h_i^0):h_s(c)\neq h_i^0(c)\) & Resumen de la cláusula de garantía alterado & 4\\
+\(M_1\) & S23--S27 & Escritura sin marca de verificación & Descuento especulativo & 5\\
+\(M_2\) & S28--S32 & Cambio de valor de una clave existente sin autorización & Reemplazo de dirección de envío & 5\\
+\(M_3\) & S33--S36 & Lectura de clave conocida con \(t_{\mathrm{lect}}-t_k>\mathrm{TTL}_k\) & Token leído después de su vencimiento & 4\\
+\(\Pi_1\) & S37--S41 & Herramienta \(a\notin K_i\) & Orden de pago emitida por OrderTriage & 5\\
+\(\Pi_2\) & S42--S46 & El validador \(V_a\) rechaza los argumentos & Reembolso con importe negativo & 5\\
+\(\Pi_3\) & S47--S50 & Se observa \(b\) y falta una aparición previa de \(a\) para \((a,b)\in D\) & Reserva sin verificación previa de inventario & 4\\\hline
+\end{tabular}
+\end{table*}
+
+\section{Instrumentación y chequeo}
+La Fig.~\ref{fig:arch} presenta el flujo de datos y la Fig.~\ref{fig:taxonomy} agrupa los operadores. El esquema de dominio usa nombres bajo \texttt{agentarch.*}. El tramo \texttt{session} representa la sesión. Los tramos \texttt{agent\_turn}, \texttt{memory\_op} y \texttt{tool\_call} contienen respectivamente las cláusulas activas y sus resúmenes, los datos de acceso a memoria y la herramienta con sus argumentos serializados.
+
+En el chequeo incremental, el procesador clasifica el tramo, evalúa las reglas de su familia y actualiza el estado observado de la sesión. Cuando alguna regla se satisface, encola un evento con \texttt{trace\_id}, \texttt{span\_id}, paso, marca temporal y conjunto de infracciones. La evaluación invoca el método \texttt{onEnd} directamente sobre tramos sintéticos, con una instancia nueva por escenario. La figura~\ref{fig:processor} muestra ese recorrido. La especificación también puede aplicarse fuera de línea recorriendo una traza consolidada en el orden de sus tramos.
+
+\begin{figure}[!t]
+\centering
+\boxstep{\texttt{onEnd(tramo)}}
+\downstep
+\boxstep{Clasificar: turno, memoria o herramienta}
+\downstep
+\boxstep{Evaluar reglas y actualizar estado observado}
+\downstep
+\boxstep{Si hay infracciones, encolar evento}
+\caption{Procesamiento al cierre del tramo. La llamada devuelve las infracciones observadas.}
+\label{fig:processor}
+\end{figure}
+
+\section{Evaluación experimental}
+\subsection{Escenarios y comparadores}
+El dominio sintético representa una aplicación de atención de pedidos. OrderTriage clasifica solicitudes, InventoryAgent consulta o reserva existencias y BillingAgent ejecuta operaciones financieras. La Fig.~\ref{fig:example} ilustra la variante de precedencia que se evalúa en S47--S50.
+
+\begin{figure}[!t]
+\centering
+\boxstep{InventoryAgent solicita \texttt{reserve\_stock}}
+\downstep
+\boxstep{Se cierra el tramo de herramienta}
+\downstep
+\boxstep{\(\Pi_3\): falta \texttt{verify\_inventory} previo}
+\downstep
+\boxstep{\arch{} encola una alerta}
+\caption{Ejemplo guionizado de precedencia: llamada observada, condición infringida y alerta.}
+\label{fig:example}
+\end{figure}
+
+El generador produce 50 trazas etiquetadas: 10 nominales y 40 con deriva (12 de prompts, 14 de memoria y 14 de políticas). Hay un patrón nominal y nueve patrones anómalos, con varias instancias por patrón. Por ejemplo, S11--S14 comparten la omisión de \texttt{clause\_auth}. Los IDs y posibles valores de negocio varían entre algunas instancias. La Tabla~\ref{tab:operators} documenta los casos y los atributos que determinan su etiqueta.
+
+Las tres configuraciones reciben las mismas trazas. \(B_1\) emite una alerta ante un estado HTTP igual o superior a 500. \(B_2\) es una variante de reglas de contorno inspirada en AgentSpec \cite{agentspec}; valida permisos de rol y argumentos de herramienta. \arch{} evalúa las nueve reglas de \(B\). Cada configuración se compara con las etiquetas de presencia de deriva y primer paso infractor, almacenadas en \texttt{ground\_truth.json}.
+
+\subsection{Métricas}
+Una traza con deriva y al menos una alerta cuenta como verdadero positivo (VP). Una alerta sobre traza nominal cuenta como falso positivo (FP); una deriva omitida constituye un falso negativo (FN). La precisión se calcula como \(\mathrm{VP}/(\mathrm{VP}+\mathrm{FP})\) y la exhaustividad como \(\mathrm{VP}/(\mathrm{VP}+\mathrm{FN})\). \(F_1\) es su media armónica y vale cero si se omiten todas las derivas. Cuando no se emiten alertas, la precisión se marca como indefinida. La métrica \(t^*\) es el porcentaje de los 40 casos anómalos cuyo primer paso alertado coincide con el esperado. Las omisiones se cuentan en el denominador.
+
+\subsection{Detección y localización}
+\input{../paper_assets/tabla_iv_resultados.tex}
+Las Tablas~\ref{tab:category_results} y~\ref{tab:experimental_results} muestran los resultados. Ninguna variante emitió alertas en los diez nominales. \(B_1\) no detectó las derivas, que se expresan en atributos arquitectónicos del escenario. \(B_2\) detectó los cinco casos de capacidades y los cinco de argumentos. \arch{} detectó las 40 derivas y localizó su primer paso en los 40 casos. La diferencia de cobertura refleja las reglas presentes en cada configuración y los patrones diseñados para ejercitarlas.
+
+\subsection{Microbenchmark del verificador}
+\input{../paper_assets/tabla_v_latencia.tex}
+El microbenchmark ejecutó 50 lotes de 1000 llamadas cronometradas por tipo de tramo sintético conforme. Antes de medir cada lote, se usó una instancia nueva y se calentó con el mismo tramo. La medición registra la duración del bucle dividida por 1000. La Tabla~\ref{tab:latency_bench} informa la media y la desviación estándar muestral (DE) de las 50 medias de lote, en microsegundos por llamada. El entorno usó Node.js 22.15.0 en Windows x64, sobre un Intel Core i7-1165G7. El tiempo incluye el camino conforme de \texttt{onEnd} con los hashes preparados. La inferencia, la exportación de telemetría y el consumo de alertas quedan fuera de la medición.
+
+\section{Amenazas a la validez}
+\textit{Constructo.} El modelo describe propiedades observables. Las reglas de prompt dependen de la integridad de los metadatos, las de memoria dependen de las marcas registradas y la precedencia usa el orden de observación de herramientas. La evaluación usa el primer paso de la traza como unidad de localización.
+
+\textit{Validez interna.} Los patrones se diseñaron para ejercitar los predicados del verificador. La repetición de cada patrón limita la independencia del corpus. Los comparadores representan dos referencias de cobertura acotada. El microbenchmark puede variar con el motor JavaScript, el recolector de memoria y la planificación del sistema operativo.
+
+\textit{Validez externa.} Los resultados corresponden a un único dominio sintético y una instancia del verificador por sesión. Evaluar datos de modelos en ejecución requiere comprobar la instrumentación, la separación de estado entre sesiones y el comportamiento ante trazas incompletas. Los diez casos nominales permiten reportar el conteo observado de falsos positivos en ese corpus.
+
+\section{Disponibilidad y reproducción}
+El repositorio de código y corpus es \url{https://github.com/leonardobaca7/agentarch}. El comando de reproducción desde la raíz es \texttt{node eval\_experiment.js}. La ejecución documentada corresponde al commit de código \texttt{bd1c1a1}. El archivo \path{results/latency_run.json} conserva el identificador completo, el entorno y las observaciones por lote del microbenchmark.
+
+\section{Conclusiones}
+\arch{} convierte invariantes de prompts, memoria y herramientas en nueve reglas de chequeo de conformidad sobre trazas. En el corpus guionizado, detectó y localizó los 40 casos con deriva, con cero alertas en diez casos nominales. El microbenchmark caracteriza el costo del núcleo en tres caminos conformes. La evaluación con trazas capturadas de modelos y la medición con el SDK de telemetría quedan como trabajo futuro.
+
+\input{referencias.tex}
+\end{document}

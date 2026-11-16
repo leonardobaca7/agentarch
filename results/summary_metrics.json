@@ -10,8 +10,7 @@
       "Recall": 0,
       "F1": 0,
       "FPR": 0,
-      "tStarAcc": 0,
-      "avgUs": 5.08
+      "tStarAcc": 0
     },
     "B2": {
       "TP": 10,
@@ -22,8 +21,7 @@
       "Recall": 25,
       "F1": 40,
       "FPR": 0,
-      "tStarAcc": 25,
-      "avgUs": 12.66
+      "tStarAcc": 25
     },
     "B_prop": {
       "TP": 40,
@@ -34,8 +32,7 @@
       "Recall": 100,
       "F1": 100,
       "FPR": 0,
-      "tStarAcc": 100,
-      "avgUs": 50.04
+      "tStarAcc": 100
     }
   },
   "by_category": {
