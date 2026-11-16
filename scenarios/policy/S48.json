@@ -4,7 +4,7 @@
   "operator": "Pi3",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "Pi3: process_payment invocado sin previo calculate_refund",
+  "desc": "InventoryAgent invoca reserve_stock sin verify_inventory previo.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

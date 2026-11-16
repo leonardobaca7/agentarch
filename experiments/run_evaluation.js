@@ -5,7 +5,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { performance } = require('perf_hooks');
 const { AgentArchSpanProcessor } = require('../src/agentarch/index');
 const { evaluateB1 } = require('../baselines/baseline_b1_otel');
 const { evaluateB2 } = require('../baselines/baseline_b2_agentspec');
@@ -17,9 +16,9 @@ function runFullEvaluation() {
     console.log(`=== AGENTARCH: EVALUACION EXPERIMENTAL COMPLETA (${scenarios.length} ESCENARIOS) ===\n`);
 
     const results = {
-        B1: { TP: 0, FP: 0, TN: 0, FN: 0, tStarCorrect: 0, totalTimeUs: 0, byCat: {} },
-        B2: { TP: 0, FP: 0, TN: 0, FN: 0, tStarCorrect: 0, totalTimeUs: 0, byCat: {} },
-        BProp: { TP: 0, FP: 0, TN: 0, FN: 0, tStarCorrect: 0, totalTimeUs: 0, byCat: {} }
+        B1: { TP: 0, FP: 0, TN: 0, FN: 0, tStarCorrect: 0, byCat: {} },
+        B2: { TP: 0, FP: 0, TN: 0, FN: 0, tStarCorrect: 0, byCat: {} },
+        BProp: { TP: 0, FP: 0, TN: 0, FN: 0, tStarCorrect: 0, byCat: {} }
     };
 
     ['Nominal', 'Prompt', 'Memory', 'Policy'].forEach(cat => {
@@ -40,7 +39,6 @@ function runFullEvaluation() {
 
         // 1. Evaluar B1
         const resB1 = evaluateB1(sc);
-        results.B1.totalTimeUs += resB1.elapsedUs;
         if (sc.expectedDrift) {
             if (resB1.detected) {
                 results.B1.TP++;
@@ -62,7 +60,6 @@ function runFullEvaluation() {
 
         // 2. Evaluar B2
         const resB2 = evaluateB2(sc, spec);
-        results.B2.totalTimeUs += resB2.elapsedUs;
         if (sc.expectedDrift) {
             if (resB2.detected) {
                 results.B2.TP++;
@@ -87,13 +84,9 @@ function runFullEvaluation() {
         let bpropDetected = false;
         let bpropFirstStep = null;
         let bpropFirstOp = null;
-        let scUs = 0;
 
         for (const span of sc.spans) {
-            const t0 = performance.now();
             const viols = verifier.onEnd(span);
-            const t1 = performance.now();
-            scUs += (t1 - t0) * 1000;
 
             if (viols && viols.length > 0 && !bpropDetected) {
                 bpropDetected = true;
@@ -101,7 +94,6 @@ function runFullEvaluation() {
                 bpropFirstOp = viols[0].op;
             }
         }
-        results.BProp.totalTimeUs += scUs;
 
         if (sc.expectedDrift) {
             if (bpropDetected) {
@@ -133,15 +125,13 @@ function runFullEvaluation() {
         const f1 = (prec + rec > 0) ? (2 * prec * rec / (prec + rec)) : 0;
         const fpr = (m.FP + m.TN > 0) ? (m.FP / (m.FP + m.TN)) : 0;
         const tStarAcc = (m.TP + m.FN > 0) ? (m.tStarCorrect / (m.TP + m.FN)) : 0;
-        const avgUs = m.totalTimeUs / scenarios.length;
         return {
             TP: m.TP, FP: m.FP, TN: m.TN, FN: m.FN,
             Precision: +(prec * 100).toFixed(1),
             Recall: +(rec * 100).toFixed(1),
             F1: +(f1 * 100).toFixed(1),
             FPR: +(fpr * 100).toFixed(1),
-            tStarAcc: +(tStarAcc * 100).toFixed(1),
-            avgUs: +avgUs.toFixed(2)
+            tStarAcc: +(tStarAcc * 100).toFixed(1)
         };
     }
 
@@ -150,8 +140,8 @@ function runFullEvaluation() {
     const bPropMetrics = calcMetrics(results.BProp);
 
     console.log('Resultados Globales:');
-    console.log('  B1 (Pasiva OTel):', b1Metrics);
-    console.log('  B2 (AgentSpec):  ', b2Metrics);
+    console.log('  B1 (HTTP >= 500):', b1Metrics);
+    console.log('  B2 (inspirada en AgentSpec):  ', b2Metrics);
     console.log('  B_prop (AgentArch):', bPropMetrics);
     console.log('');
 
@@ -176,27 +166,40 @@ function runFullEvaluation() {
     };
     fs.writeFileSync(summaryPath, JSON.stringify(summaryData, null, 2), 'utf8');
 
-    // Guardar snippet LaTeX de Tabla IV en paper_assets/
-    const texTable = `\\begin{table*}[t]
-\\caption{Matriz de Resultados Experimentales Cuantitativos ($B_1$ vs $B_2$ vs $B_{\\text{prop}}$ sobre 50 Escenarios)}
-\\label{tab:experimental_results}
-\\centering
-\\scriptsize
-\\begin{tabularx}{\\textwidth}{lcccccccccc}
-\\toprule
-\\multirow{2}{*}{\\textbf{Configuraci\\'on}} & \\textbf{Nominal} & \\multicolumn{2}{c}{\\textbf{Prompt (12 esc.)}} & \\multicolumn{2}{c}{\\textbf{Memoria (14 esc.)}} & \\multicolumn{2}{c}{\\textbf{Pol\\'iticas (14 esc.)}} & \\multicolumn{3}{c}{\\textbf{Evaluaci\\'on Global}} \\\\
-\\cmidrule(lr){2-2} \\cmidrule(lr){3-4} \\cmidrule(lr){5-6} \\cmidrule(lr){7-8} \\cmidrule(lr){9-11}
-& \\textbf{FPR (\\%)} & \\textbf{Recall (\\%)} & \\textbf{$F_1$ (\\%)} & \\textbf{Recall (\\%)} & \\textbf{$F_1$ (\\%)} & \\textbf{Recall (\\%)} & \\textbf{$F_1$ (\\%)} & \\textbf{Precisi\\'on} & \\textbf{Recall} & \\textbf{$F_1$-Score} & \\textbf{$t^*$ Acc.} & \\textbf{Latencia Media} \\\\
-\\midrule
-\\textbf{L\\'inea Base $B_1$ (Pasiva OTel)} & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & $2.60\\;\\mu$s \\\\
-\\textbf{L\\'inea Base $B_2$ (AgentSpec)} & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 0.0\\% & 71.4\\% & 83.3\\% & 100.0\\% & 25.0\\% & 40.0\\% & 25.0\\% & $30.97\\;\\mu$s \\\\
-\\textbf{Propuesto $B_{\\text{prop}}$ (\\textsc{AgentArch})} & \\textbf{0.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & \\textbf{100.0\\%} & $\\mathbf{38.14\\;\\mu}$\\textbf{s} \\\\
-\\bottomrule
-\\end{tabularx}
-\\end{table*}
-`;
-    const tablePath = path.join(__dirname, '../paper_assets/tabla_iv_resultados.tex');
-    fs.writeFileSync(tablePath, texTable, 'utf8');
+    const rows = Object.entries(summaryData.metrics);
+    const tableRow = (cells) => cells.join(' & ') + String.raw`\\`;
+    const table = (caption, label, alignment, header, body) => [
+        String.raw`\begin{table}[!t]`,
+        String.raw`\caption{` + caption + '}',
+        String.raw`\label{` + label + '}',
+        String.raw`\centering\footnotesize`,
+        String.raw`\begin{tabular}{` + alignment + '}',
+        String.raw`\hline`,
+        tableRow(header),
+        String.raw`\hline`,
+        ...body.map(tableRow),
+        String.raw`\hline`,
+        String.raw`\end{tabular}`,
+        String.raw`\end{table}`,
+        ''
+    ].join('\n');
+    const names = { B1: '$B_1$', B2: '$B_2$', B_prop: 'AgentArch' };
+    const categoryRows = rows.map(([id]) => [
+        names[id],
+        ...['Prompt', 'Memory', 'Policy'].map((category) => {
+            const { TP, FN } = summaryData.by_category[id][category];
+            return String(TP) + '/' + (TP + FN);
+        })
+    ]);
+    const globalRows = rows.map(([id, m]) => [
+        names[id], m.TP, m.FP, m.FN, m.TP + m.FP ? m.Precision : '--',
+        m.Recall, m.F1, m.tStarAcc
+    ]);
+    const texTable = table('Casos detectados por dimensión', 'tab:category_results', 'lrrr',
+        ['Variante', 'Prompts', 'Memoria', 'Políticas'], categoryRows)
+        + table(String.raw`Resultados globales (métricas en \%)`, 'tab:experimental_results', 'lrrrrrrr',
+            ['Variante', 'VP', 'FP', 'FN', 'Prec.', 'Exh.', '$F_1$', '$t^*$'], globalRows);
+    fs.writeFileSync(path.join(__dirname, '../paper_assets/tabla_iv_resultados.tex'), texTable, 'utf8');
 
     // Ejecutar benchmark de latencia
     const bench = runBenchmark(50000);

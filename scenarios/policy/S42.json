@@ -4,7 +4,7 @@
   "operator": "Pi2",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "Pi2: Monto de reembolso negativo (-150) en calculate_refund",
+  "desc": "BillingAgent solicita un reembolso con importe negativo.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

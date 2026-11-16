@@ -4,7 +4,7 @@
   "operator": "M3",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "M3: Lectura de cotización de stock expirada según TTL",
+  "desc": "Lectura de un token a los 25 s con un TTL de 10 s.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

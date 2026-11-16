@@ -4,7 +4,7 @@
   "operator": "M1",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "M1: Admisión no verificada de reclamo compensatorio",
+  "desc": "Escritura de un descuento especulativo con verified=false.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

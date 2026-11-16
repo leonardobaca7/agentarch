@@ -4,7 +4,7 @@
   "operator": "P3",
   "expected_drift": true,
   "first_step": 1,
-  "desc": "P3: Digest SHA-256 no coincidente en directiva de alcance",
+  "desc": "El resumen de clause_warranty_terms de BillingAgent difiere del canónico.",
   "expectedDrift": true,
   "expectedStep": 1,
   "spans": [

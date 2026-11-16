@@ -3,6 +3,8 @@
  */
 
 const fs = require('fs');
+const os = require('os');
+const { execFileSync } = require('child_process');
 const path = require('path');
 const { performance } = require('perf_hooks');
 const { AgentArchSpanProcessor } = require('../src/agentarch/index');
@@ -10,7 +12,6 @@ const { getSystemSpec } = require('../scenarios/scenario_loader');
 
 function runBenchmark(N = 50000) {
     const spec = getSystemSpec();
-    const verifier = new AgentArchSpanProcessor(spec);
 
     console.log(`=== INICIANDO BENCHMARK DE LATENCIA (N = ${N.toLocaleString()} iteraciones) ===`);
 
@@ -26,12 +27,6 @@ function runBenchmark(N = 50000) {
             ]
         }
     };
-    const t0_turn = performance.now();
-    for (let i = 0; i < N; i++) {
-        verifier.onEnd(turnSpan);
-    }
-    const t1_turn = performance.now();
-    const meanUsTurn = ((t1_turn - t0_turn) / N) * 1000;
 
     // 2. Tramo memory_op
     const memSpan = {
@@ -46,12 +41,6 @@ function runBenchmark(N = 50000) {
             'agentarch.memory.authorized_replacement': false
         }
     };
-    const t0_mem = performance.now();
-    for (let i = 0; i < N; i++) {
-        verifier.onEnd(memSpan);
-    }
-    const t1_mem = performance.now();
-    const meanUsMem = ((t1_mem - t0_mem) / N) * 1000;
 
     // 3. Tramo tool_call
     const toolSpan = {
@@ -62,59 +51,78 @@ function runBenchmark(N = 50000) {
             'agentarch.tool.args': JSON.stringify({ order_id: 'ORD-1001' })
         }
     };
-    const t0_tool = performance.now();
-    for (let i = 0; i < N; i++) {
-        verifier.onEnd(toolSpan);
+
+    const batches = 50;
+    if (!Number.isSafeInteger(N) || N < batches || N % batches !== 0) {
+        throw new RangeError('N debe ser un múltiplo positivo de 50');
     }
-    const t1_tool = performance.now();
-    const meanUsTool = ((t1_tool - t0_tool) / N) * 1000;
+    const batchSize = N / batches;
+    const measurements = [
+        { span: turnSpan, label: 'Turno', samples: [] },
+        { span: memSpan, label: 'Memoria', samples: [] },
+        { span: toolSpan, label: 'Herramienta', samples: [] }
+    ];
 
-    const weightedAvg = (meanUsTurn + meanUsMem + meanUsTool) / 3;
+    for (let batch = -1; batch < batches; batch++) {
+        for (const measurement of measurements) {
+            const verifier = new AgentArchSpanProcessor(spec);
+            // Calentar el mismo camino antes de medir el lote.
+            for (let i = 0; i < batchSize; i++) verifier.onEnd(measurement.span);
+            if (batch < 0) continue;
+            const start = performance.now();
+            for (let i = 0; i < batchSize; i++) verifier.onEnd(measurement.span);
+            measurement.samples.push((performance.now() - start) * 1000 / batchSize);
+        }
+    }
 
-    console.log(`* agentarch.agent_turn: ${meanUsTurn.toFixed(2)} us (±0.12)`);
-    console.log(`* agentarch.memory_op:  ${meanUsMem.toFixed(2)} us (±0.05)`);
-    console.log(`* agentarch.tool_call:  ${meanUsTool.toFixed(2)} us (±0.08)`);
-    console.log(`* Promedio ponderado:   ${weightedAvg.toFixed(2)} us (±0.08)\n`);
+    const stats = measurements.map(({ span, label, samples }) => {
+        const mean = samples.reduce((sum, sample) => sum + sample, 0) / batches;
+        const variance = samples.reduce((sum, sample) => sum + (sample - mean) ** 2, 0) / (batches - 1);
+        return { span: span.name, label, mean, sd: Math.sqrt(variance), samples };
+    });
 
-    // Guardar CSV en results/
-    const csvContent = [
-        'span_type,evaluated_operators,mean_latency_us,std_dev_us,sample_size',
-        `agentarch.agent_turn,"P1, P2, P3 (Prompt clauses / SHA-256)",${meanUsTurn.toFixed(2)},0.12,${N}`,
-        `agentarch.memory_op,"M1, M2, M3 (Admission, Overwrite, TTL)",${meanUsMem.toFixed(2)},0.05,${N}`,
-        `agentarch.tool_call,"Pi1, Pi2, Pi3 (Capabilities, Bounds, Order)",${meanUsTool.toFixed(2)},0.08,${N}`,
-        `weighted_average,"Full verification cycle per span",${weightedAvg.toFixed(2)},0.08,${N}`
-    ].join('\n');
+    const root = path.join(__dirname, '..');
+    let commit = null;
+    try {
+        commit = execFileSync('git', ['-c', 'safe.directory=' + root.replaceAll('\\', '/'),
+            'rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    } catch {
+        // Los archivos exportados sin historial también se pueden evaluar.
+    }
+    const metadata = {
+        commit, timestamp: new Date().toISOString(), node: process.version,
+        platform: os.platform(), release: os.release(), arch: os.arch(),
+        cpu: os.cpus()[0]?.model ?? null, batches, batchSize
+    };
+    fs.writeFileSync(path.join(root, 'results/latency_run.json'),
+        JSON.stringify({ metadata, stats }, null, 2) + '\n');
+    const csv = [
+        'span_type,mean_latency_us,batch_std_dev_us,batches,calls_per_batch',
+        ...stats.map(({ span, mean, sd }) => [span, mean.toFixed(3), sd.toFixed(3), batches, batchSize].join(','))
+    ];
+    fs.writeFileSync(path.join(root, 'results/latency_benchmark.csv'), csv.join('\n') + '\n');
 
-    const resultsPath = path.join(__dirname, '../results/latency_benchmark.csv');
-    fs.writeFileSync(resultsPath, csvContent, 'utf8');
-
-    // Guardar snippet LaTeX en paper_assets/
-    const texContent = `\\begin{table}[t]
-\\caption{Sobrecarga de Latencia por Tipo de Tramo ($\\Delta \\mu$s, $N=50,000$ Muestras)}
-\\label{tab:latency_bench}
-\\centering
-\\scriptsize
-\\begin{tabularx}{\\columnwidth}{Xlrr}
-\\toprule
-\\textbf{Tramo OpenTelemetry} & \\textbf{Operadores} & \\textbf{Media} & \\textbf{Desv.} \\\\
-\\midrule
-\\texttt{agentarch.agent\\_turn} & $P_1\\text{--}P_3$ & ${meanUsTurn.toFixed(2)}\\;\\mu$s & $\\pm 0.12$ \\\\
-\\texttt{agentarch.memory\\_op} & $M_1\\text{--}M_3$ & ${meanUsMem.toFixed(2)}\\;\\mu$s & $\\pm 0.05$ \\\\
-\\texttt{agentarch.tool\\_call} & $\\Pi_1\\text{--}\\Pi_3$ & ${meanUsTool.toFixed(2)}\\;\\mu$s & $\\pm 0.08$ \\\\
-\\midrule
-\\textbf{Promedio Ponderado} & \\textbf{Ciclo completo} & \\textbf{${weightedAvg.toFixed(2)}\\;\\mu}\\textbf{s} & $\\mathbf{\\pm 0.08}$ \\\\
-\\bottomrule
-\\end{tabularx}
-\\end{table}
-`;
-    const assetsPath = path.join(__dirname, '../paper_assets/tabla_v_latencia.tex');
-    fs.writeFileSync(assetsPath, texContent, 'utf8');
-
-    return { meanUsTurn, meanUsMem, meanUsTool, weightedAvg };
+    const rows = stats.map(({ label, mean, sd }) =>
+        [label, mean.toFixed(3), sd.toFixed(3)].join(' & ') + String.raw`\\`);
+    const tex = [
+        String.raw`\begin{table}[!t]`,
+        String.raw`\caption{Tiempo de verificación por tramo ($\mu$s)}`,
+        String.raw`\label{tab:latency_bench}`,
+        String.raw`\centering\footnotesize`,
+        String.raw`\begin{tabular}{lrr}`,
+        String.raw`\hline`,
+        String.raw`Tramo & Media & DE entre lotes\\\hline`,
+        ...rows,
+        String.raw`\hline`,
+        String.raw`\end{tabular}`,
+        String.raw`\end{table}`,
+        ''
+    ];
+    fs.writeFileSync(path.join(root, 'paper_assets/tabla_v_latencia.tex'), tex.join('\n'));
+    console.table(stats.map(({ span, mean, sd }) => ({ span, mean_us: mean, batch_sd_us: sd })));
+    return { metadata, stats };
 }
 
-if (require.main === module) {
-    runBenchmark();
-}
+if (require.main === module) runBenchmark();
 
 module.exports = { runBenchmark };

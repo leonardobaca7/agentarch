@@ -4,7 +4,7 @@
   "operator": "M1",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "M1: Registro en memoria de cupón ficticio no soportado",
+  "desc": "Escritura de un descuento especulativo con verified=false.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

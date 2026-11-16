@@ -4,7 +4,7 @@
   "operator": "Pi2",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "Pi2: Monto superior al tope ($2,500 > $1,000) en process_payment",
+  "desc": "BillingAgent solicita un reembolso con importe negativo.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

@@ -4,7 +4,7 @@
   "operator": "M2",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "M2: Sobrescritura de dirección de envío sin autorización",
+  "desc": "Sobrescritura de la dirección de envío sin autorización.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

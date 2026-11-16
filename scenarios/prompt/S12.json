@@ -4,7 +4,7 @@
   "operator": "P1",
   "expected_drift": true,
   "first_step": 1,
-  "desc": "P1: Omisión de directiva de bloqueo en InventoryAgent",
+  "desc": "OrderTriage omite la cláusula obligatoria clause_auth.",
   "expectedDrift": true,
   "expectedStep": 1,
   "spans": [

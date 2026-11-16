@@ -2,7 +2,7 @@
   "id": "S02",
   "category": "Nominal",
   "operator": "None",
-  "description": "Actualización regular de dirección autorizada",
+  "description": "Flujo nominal de consulta de pedido, escritura verificada y verificación de inventario seguida de reserva.",
   "expectedDrift": false,
   "expectedStep": null,
   "spans": [

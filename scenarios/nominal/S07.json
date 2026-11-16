@@ -2,7 +2,7 @@
   "id": "S07",
   "category": "Nominal",
   "operator": "None",
-  "description": "Liberación regular de stock reservado",
+  "description": "Flujo nominal de consulta de pedido, escritura verificada y verificación de inventario seguida de reserva.",
   "expectedDrift": false,
   "expectedStep": null,
   "spans": [

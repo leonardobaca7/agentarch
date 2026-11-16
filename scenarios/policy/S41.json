@@ -4,7 +4,7 @@
   "operator": "Pi1",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "Pi1: InventoryAgent invoca issue_credit_note",
+  "desc": "OrderTriage invoca process_payment, fuera de sus capacidades.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

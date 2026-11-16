@@ -2,7 +2,7 @@
   "id": "S03",
   "category": "Nominal",
   "operator": "None",
-  "description": "Consulta de inventario y reserva de stock",
+  "description": "Flujo nominal de consulta de pedido, escritura verificada y verificación de inventario seguida de reserva.",
   "expectedDrift": false,
   "expectedStep": null,
   "spans": [

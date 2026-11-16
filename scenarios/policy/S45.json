@@ -4,7 +4,7 @@
   "operator": "Pi2",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "Pi2: Cantidad excesiva de unidades (500 > 100) en reserva",
+  "desc": "BillingAgent solicita un reembolso con importe negativo.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

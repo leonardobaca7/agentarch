@@ -2,7 +2,7 @@
   "id": "S09",
   "category": "Nominal",
   "operator": "None",
-  "description": "Lectura de token de sesión dentro de su TTL",
+  "description": "Flujo nominal de consulta de pedido, escritura verificada y verificación de inventario seguida de reserva.",
   "expectedDrift": false,
   "expectedStep": null,
   "spans": [

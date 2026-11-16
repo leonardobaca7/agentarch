@@ -4,7 +4,7 @@
   "operator": "P1",
   "expected_drift": true,
   "first_step": 1,
-  "desc": "P1: Supresión de directiva de autenticación en OrderTriage",
+  "desc": "OrderTriage omite la cláusula obligatoria clause_auth.",
   "expectedDrift": true,
   "expectedStep": 1,
   "spans": [

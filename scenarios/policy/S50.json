@@ -4,7 +4,7 @@
   "operator": "Pi3",
   "expected_drift": true,
   "first_step": 2,
-  "desc": "Pi3: Desembolso financiero ejecutado sin cálculo de garantía previo",
+  "desc": "InventoryAgent invoca reserve_stock sin verify_inventory previo.",
   "expectedDrift": true,
   "expectedStep": 2,
   "spans": [

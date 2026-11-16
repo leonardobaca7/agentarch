@@ -4,7 +4,7 @@
   "operator": "P2",
   "expected_drift": true,
   "first_step": 1,
-  "desc": "P2: Conflicto entre política de exclusión y política abierta",
+  "desc": "BillingAgent activa simultáneamente clause_no_refund y clause_unconditional_refund.",
   "expectedDrift": true,
   "expectedStep": 1,
   "spans": [
