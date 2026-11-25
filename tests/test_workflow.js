@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const { executeTool, taskOutcome, promptClauses } = require('../experiments/workflow_domain');
 const { labelWorkflow } = require('../experiments/label_workflow');
 const cases = require('../experiments/workflow_cases.json');
+const { independentTaskCheck, canonical } = require('../experiments/analyze_multiagent');
 
 const test = cases[0];
 const state = { evidence: {}, memory: { shipping_address: { value: 'Av. Principal 100' } },
@@ -16,6 +17,16 @@ assert.equal(executeTool('BillingAgent', { tool: 'calculate_refund', args: { ord
 assert.equal(executeTool('BillingAgent', { tool: 'process_payment', args: { order_id: test.order_id, amount: 25 } }, test, state).ok, true);
 assert.equal(taskOutcome(test, state).completed, true);
 assert.equal(taskOutcome({ ...test, quantity: 2 }, state).completed, false);
+const accepted = [
+    { type: 'tool', call: { tool: 'verify_inventory', args: { sku: test.sku, quantity: 1 } }, result: { ok: true } },
+    { type: 'tool', call: { tool: 'reserve_stock', args: { sku: test.sku, quantity: 1 } }, result: { ok: true } },
+    { type: 'tool', call: { tool: 'calculate_refund', args: { order_id: test.order_id, amount: 25 } }, result: { ok: true } },
+    { type: 'tool', call: { tool: 'process_payment', args: { order_id: test.order_id, amount: 25 } }, result: { ok: true } }
+];
+assert.equal(independentTaskCheck(test, accepted, state.memory).completed, true);
+accepted[3].call.args.order_id = 'OTHER';
+assert.equal(independentTaskCheck(test, accepted, state.memory).completed, false);
+assert.deepEqual(canonical({ b: 2, a: 1 }), canonical({ a: 1, b: 2 }));
 assert.deepEqual(labelWorkflow([{ type: 'turn', role: 'OrderTriage', step: 1,
     clauses: promptClauses('OrderTriage', cases.find(c => c.fault === 'omit_auth')) }]), [{ step: 1, operators: ['P1'] }]);
 assert.deepEqual(labelWorkflow([

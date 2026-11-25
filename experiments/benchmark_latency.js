@@ -106,7 +106,7 @@ function runBenchmark(N = 50000) {
         [label, mean.toFixed(3), sd.toFixed(3)].join(' & ') + String.raw`\\`);
     const tex = [
         String.raw`\begin{table}[!t]`,
-        String.raw`\caption{Tiempo de verificación por tramo ($\mu$s)}`,
+        String.raw`\caption{Tiempo de verificación por tramo ($\mu\mathrm{s}$)}`,
         String.raw`\label{tab:latency_bench}`,
         String.raw`\centering\footnotesize`,
         String.raw`\begin{tabular}{lrr}`,

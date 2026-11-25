@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](pyproject.toml)
 [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-green.svg)](package.json)
-[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-SemConv_v1.42.0-orange.svg)](https://opentelemetry.io/)
+[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-SDK_2.12.1-orange.svg)](https://opentelemetry.io/)
 
 Official reference implementation and companion research artifact for the paper:
 
@@ -34,7 +34,7 @@ Los sistemas multi-agente (MAS) basados en modelos de lenguaje de gran escala (L
 * **Espacio de Comportamiento $B = \langle P, M, \Pi \rangle$:** Modela formalmente directivas de prompt versionadas criptográficamente con SHA-256 ($P$), estados de memoria gobernados deterministamente ($M$) y reglas de precedencia causal entre herramientas ($\Pi$).
 * **Taxonomía de 9 Operadores de Deriva:** Detecta supresión obligatoria ($P_1$), inyección de conflicto ($P_2$), alteración criptográfica ($P_3$), admisión no verificada ($M_1$), sobrescritura destructiva ($M_2$), lecturas caducadas por TTL ($M_3$), herramientas no permitidas ($\Pi_1$), límites de argumentos ($\Pi_2$) e inversiones de precedencia ($\Pi_3$).
 * **Monitor pasivo:** el núcleo JavaScript evalúa tramos en `onEnd(span)` y encola eventos. El adaptador `AgentArchOtelProcessor` recibe tramos del SDK y mantiene estado por traceId. La exportación del piloto es local y síncrona.
-* **Microbenchmark del verificador:** mide llamadas directas a onEnd sobre tramos sintéticos conformes. Los resultados y el entorno están en results/.
+* **Microbenchmark del verificador:** mide llamadas directas a onEnd sobre tramos sintéticos conformes y con alerta. Se publican muestras, mediana y percentiles de medias por lote en results/latency_paths/.
 
 ---
 
@@ -149,7 +149,8 @@ un rol y ejecutó las llamadas generadas en herramientas locales de prueba.
 
 Las réplicas de cada solicitud produjeron el mismo plan. La diversidad efectiva
 es de ocho planes, cuatro conformes y cuatro con infracciones. Las etiquetas
-provienen de un oráculo separado aplicado a las acciones observadas. El piloto
+provienen de un anotador separado que codifica las mismas políticas: la concordancia
+comprueba consistencia de implementación. El piloto
 abarca permisos, argumentos y precedencia de herramientas. La cobertura completa
 de las nueve reglas se comprueba en la suite guionizada.
 
@@ -167,6 +168,59 @@ El protocolo indica cómo iniciar el servidor y ejecutar una nueva medición en 
 directorio distinto para preservar los datos. La conexión al modelo propaga los
 errores de red y formato. La configuración usa herramientas locales de prueba.
 
+## Ampliación con tres roles y memoria compartida
+
+Doce solicitudes se ejecutaron cinco veces con temperatura 0,7 y semillas 100–104.
+Cada sesión contiene tres roles que reciben mensajes, resultados de herramientas
+y memoria compartida de los anteriores. Se obtuvieron 60 sesiones válidas, 180
+peticiones al modelo, 1 085 tramos del SDK y 60 planes distintos. La unidad de
+tarea es la solicitud: son doce grupos de cinco muestras.
+
+| Configuración | VP | FP | VN | FN | Primer paso correcto |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| B1 | 0 | 0 | 3 | 57 | 0/57 |
+| B2 | 33 | 0 | 3 | 24 | 13/57 |
+| AgentArch | 57 | 0 | 3 | 0 | 57/57 |
+
+El anotador implementa las mismas políticas mediante código separado. Estos
+resultados verifican concordancia y no validación independiente de las políticas.
+Los cuatro tipos observados fuera de herramientas son P1, P3, M1 y M2; P2 y M3
+no aparecieron. W10/W11 introducen perturbaciones de prompt en diez sesiones;
+otras 47 sesiones presentan infracciones sin esas perturbaciones.
+
+**Finalización de tarea: 0/60.** El criterio adicional comprueba los efectos de
+inventario, finanzas y dirección frente al pedido. Las tres sesiones conformes
+también quedaron incompletas. El modelo de 0,6 mil millones de parámetros, con
+un plan por rol y sin ciclo de reparación, no resolvió estas tareas en esta
+configuración. La ausencia de alertas no garantiza la finalización del pedido.
+
+El [protocolo previo](docs/second_audit_protocol.md) fija las solicitudes, la
+orquestación y los criterios. Los [datos completos](results/multiagent_run/)
+conservan respuestas, mensajes transferidos, efectos, tramos, etiquetas y alertas.
+La plantilla de revisión humana tiene los campos del revisor vacíos.
+
+```powershell
+npm ci
+npm run test:unit
+node experiments/analyze_multiagent.js
+```
+
+Para repetir la inferencia se requiere iniciar el servidor indicado en el
+protocolo y elegir un directorio de salida nuevo. El análisis regenera las
+tablas VI–VIII y comprueba las relaciones entre peticiones, tramos y resultados.
+
+La nueva medición temporal usa cien lotes de mil llamadas en seis caminos.
+La cola se consume fuera del intervalo cronometrado y se comprueba el número
+de alertas. [Las observaciones y percentiles](results/latency_paths/) incluyen
+también el recálculo de percentiles de los datos históricos conservados.
+Los percentiles corresponden a medias de lote, no a llamadas individuales.
+
+El nombre AgentArch también identifica el [benchmark de Bogavelli et al.](https://aclanthology.org/2026.aacl-long.44/).
+Este repositorio contiene el verificador de conformidad de Baca Calsin y Chipana
+Jeronimo. El artículo diferencia ambos trabajos. Los atributos agentarch.* son
+una extensión de dominio; la integración con el SDK no implica conformidad
+completa con todas las convenciones semánticas GenAI.
+
 ## Supuestos y límites
 
 El 100 % de la suite guionizada describe la cobertura de los casos preparados.
@@ -180,14 +234,16 @@ incorrecta puede ocultar M1. Se regenera con node experiments/instrumentation_se
 
 ## Versión y artículo
 
-La etiqueta v0.2.0-c2-review fija esta revisión. bd1c1a1 identifica el código del
+La etiqueta v0.3.0-c2-second-review fija la segunda revisión y conserva la
+anterior, v0.2.0-c2-review. cd6dc65 identifica el ejecutor y protocolo de la
+ampliación. bd1c1a1 identifica el código del
 microbenchmark original, 73dd953 incorpora esos resultados y el primer manuscrito
 y 647f45f identifica el ejecutor del piloto del modelo. Los tiempos guardados
 corresponden a sus respectivas ejecuciones.
 
-[El fuente IEEE](paper/articulo.tex) incorpora el piloto, el análisis de
-incertidumbre y trabajo futuro explícito. Las correcciones están documentadas
-en [la respuesta a la auditoría](docs/respuesta_revision_c2.md).
+[El fuente IEEE](paper/articulo.tex) y [el PDF](paper/articulo.pdf) incorporan
+ambas evaluaciones, los límites del etiquetado automático y los resultados de
+tarea. Las correcciones están documentadas en [la respuesta a la segunda auditoría](docs/respuesta_segunda_auditoria.md).
 
 ## 👥 Autores y Contacto
 

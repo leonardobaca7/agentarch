@@ -1,0 +1,16 @@
+\begin{table*}[!t]
+\caption{Tiempo del núcleo por camino ($\mu\mathrm{s}$ por llamada, percentiles de 100 medias de lote)}
+\label{tab:latency_bench}
+\centering\footnotesize
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llrrrrrr}
+\hline
+Tramo & Camino & Media & DE & Mínimo & Mediana & p95 & p99\\\hline
+Turno & Conforme & 0.086 & 0.090 & 0.059 & 0.072 & 0.092 & 0.502\\
+Memoria & Conforme & 0.020 & 0.025 & 0.010 & 0.012 & 0.032 & 0.149\\
+Herramienta & Conforme & 0.439 & 0.104 & 0.348 & 0.416 & 0.606 & 0.899\\
+Turno & Con alerta & 0.191 & 0.183 & 0.120 & 0.144 & 0.528 & 1.150\\
+Memoria & Con alerta & 0.149 & 0.109 & 0.096 & 0.112 & 0.444 & 0.563\\
+Herramienta & Con alerta & 0.596 & 0.159 & 0.468 & 0.557 & 0.976 & 1.094\\
+\hline
+\end{tabular*}
+\end{table*}
