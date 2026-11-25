@@ -10,9 +10,7 @@ class LocalLLMAdapter {
     }
 
     async generateResponse(systemPrompt, userMessage, temperature = 0.0) {
-        // En ausencia de endpoint local activo, recurre a generador sintético determinista
-        try {
-            const res = await fetch(`${this.endpoint}/chat/completions`, {
+        const res = await fetch(`${this.endpoint}/chat/completions`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -21,17 +19,16 @@ class LocalLLMAdapter {
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: userMessage }
                     ],
-                    temperature
-                })
+                    temperature,
+                    max_tokens: 512
+                }),
+                signal: AbortSignal.timeout(180000)
             });
-            if (res.ok) {
-                const data = await res.json();
-                return data.choices[0].message.content;
-            }
-        } catch (e) {
-            // Fallback a modo simulado
-        }
-        return `[SIMULATED_LLM_OUTPUT_${this.model}] Response to: ${userMessage}`;
+        if (!res.ok) throw new Error(`LLM HTTP ${res.status}: ${await res.text()}`);
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (typeof content !== 'string') throw new Error('LLM response lacks message content');
+        return content;
     }
 }
 
