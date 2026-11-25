@@ -41,7 +41,7 @@ el ejecutor utilizado en el piloto del modelo. La etiqueta v0.2.0-c2-review fija
 de esta entrega. El protocolo del piloto registra parámetros, modelo, SHA-256, equipo y reproducción.
 
 Se normalizó la atribución de copyright de LICENSE para conservar el texto estándar MIT.
-El reconocimiento de licencia de GitHub se verifica después de publicar la revisión.
+La API de GitHub reconoció la licencia publicada como MIT después de la actualización.
 
 ## Interpretación del cien por ciento
 
