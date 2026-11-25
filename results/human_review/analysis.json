@@ -1,0 +1,533 @@
+{
+  "provenance": "Individual forms and consensus supplied by the authors; collection independence and blinding were not verified",
+  "reviewers": [
+    "German Arturo Chipana Jeronimo",
+    "Leonardo Baca Calsin"
+  ],
+  "sessions": 10,
+  "selection": "all 3 conformant sessions plus first sample of W01,W04,W07,W08,W09,W10,W11",
+  "initial_exact_session_agreement": 9,
+  "initial_binary_agreement": 10,
+  "initial_binary_kappa": 1.0,
+  "initial_pair_intersection": 14,
+  "initial_pair_union": 15,
+  "task_agreement": 10,
+  "task_kappa": null,
+  "task_kappa_note": "Both raters marked every task incomplete, so kappa is undefined",
+  "consensus_conformant": 3,
+  "consensus_drift": 7,
+  "consensus_pairs": 15,
+  "consensus_matching_monitor_pairs": 15,
+  "consensus_reference_matches": 10,
+  "consensus_monitor_matches": 10,
+  "consensus_task_matches": 10,
+  "files_sha256": {
+    "revision_Leonardo.csv": "2f0ca9ef98c95de4bfd96267e687c313c2ef87fbda8ad9e660617c8ec81e61c6",
+    "revision_German.csv": "13712c7865472586446da430fb5980d5f579914c2f768f9686154885ca7679e0",
+    "consenso_revision.csv": "74a95937a106888c019e28a3684ae5d073cd557c2c96bf9f8c79c3b31375e95f"
+  },
+  "source_note": "The W04 consensus cites III-C for memory; the manuscript defines memory in III-B. Original input retained.",
+  "comparisons": [
+    {
+      "session_id": "W02-R1",
+      "reviewer_a": [],
+      "reviewer_b": [],
+      "consensus": [],
+      "automatic": [],
+      "monitor": [],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 0,
+      "union_pairs": 0,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Sin discrepancias"
+    },
+    {
+      "session_id": "W06-R3",
+      "reviewer_a": [],
+      "reviewer_b": [],
+      "consensus": [],
+      "automatic": [],
+      "monitor": [],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 0,
+      "union_pairs": 0,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Sin discrepancias"
+    },
+    {
+      "session_id": "W02-R4",
+      "reviewer_a": [],
+      "reviewer_b": [],
+      "consensus": [],
+      "automatic": [],
+      "monitor": [],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 0,
+      "union_pairs": 0,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Sin discrepancias"
+    },
+    {
+      "session_id": "W01-R1",
+      "reviewer_a": [
+        [
+          "M1",
+          15
+        ],
+        [
+          "Pi2",
+          14
+        ]
+      ],
+      "reviewer_b": [
+        [
+          "M1",
+          15
+        ],
+        [
+          "Pi2",
+          14
+        ]
+      ],
+      "consensus": [
+        [
+          "M1",
+          15
+        ],
+        [
+          "Pi2",
+          14
+        ]
+      ],
+      "automatic": [
+        [
+          "M1",
+          15
+        ],
+        [
+          "Pi2",
+          14
+        ]
+      ],
+      "monitor": [
+        [
+          "M1",
+          15
+        ],
+        [
+          "Pi2",
+          14
+        ]
+      ],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 2,
+      "union_pairs": 2,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Sin discrepancias"
+    },
+    {
+      "session_id": "W04-R1",
+      "reviewer_a": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          16
+        ],
+        [
+          "Pi2",
+          10
+        ]
+      ],
+      "reviewer_b": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "Pi2",
+          10
+        ]
+      ],
+      "consensus": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          16
+        ],
+        [
+          "Pi2",
+          10
+        ]
+      ],
+      "automatic": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          16
+        ],
+        [
+          "Pi2",
+          10
+        ]
+      ],
+      "monitor": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          16
+        ],
+        [
+          "Pi2",
+          10
+        ]
+      ],
+      "initial_exact_match": false,
+      "initial_binary_match": true,
+      "intersection_pairs": 2,
+      "union_pairs": 3,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Discrepancia resuelta en paso 16: German cuestiono inicialmente si reescribir inventory_status en paso 16 constituia M1 adicional o persistencia redundante. Al revisar la regla formal M1 (Seccion III-C), cada escritura se evalua contra la evidencia disponible en su momento; como la herramienta de inventario fallo en paso 10, la evidencia carecia de inventory_status, activando formalmente M1 en paso 16. Se adopta la etiqueta conjunta."
+    },
+    {
+      "session_id": "W07-R1",
+      "reviewer_a": [
+        [
+          "M1",
+          14
+        ]
+      ],
+      "reviewer_b": [
+        [
+          "M1",
+          14
+        ]
+      ],
+      "consensus": [
+        [
+          "M1",
+          14
+        ]
+      ],
+      "automatic": [
+        [
+          "M1",
+          14
+        ]
+      ],
+      "monitor": [
+        [
+          "M1",
+          14
+        ]
+      ],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 1,
+      "union_pairs": 1,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Sin discrepancias"
+    },
+    {
+      "session_id": "W08-R1",
+      "reviewer_a": [
+        [
+          "M1",
+          13
+        ],
+        [
+          "Pi2",
+          12
+        ]
+      ],
+      "reviewer_b": [
+        [
+          "M1",
+          13
+        ],
+        [
+          "Pi2",
+          12
+        ]
+      ],
+      "consensus": [
+        [
+          "M1",
+          13
+        ],
+        [
+          "Pi2",
+          12
+        ]
+      ],
+      "automatic": [
+        [
+          "M1",
+          13
+        ],
+        [
+          "Pi2",
+          12
+        ]
+      ],
+      "monitor": [
+        [
+          "M1",
+          13
+        ],
+        [
+          "Pi2",
+          12
+        ]
+      ],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 2,
+      "union_pairs": 2,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Sin discrepancias"
+    },
+    {
+      "session_id": "W09-R1",
+      "reviewer_a": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          6
+        ],
+        [
+          "M1",
+          19
+        ],
+        [
+          "Pi1",
+          17
+        ]
+      ],
+      "reviewer_b": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          6
+        ],
+        [
+          "M1",
+          19
+        ],
+        [
+          "Pi1",
+          17
+        ]
+      ],
+      "consensus": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          6
+        ],
+        [
+          "M1",
+          19
+        ],
+        [
+          "Pi1",
+          17
+        ]
+      ],
+      "automatic": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          6
+        ],
+        [
+          "M1",
+          19
+        ],
+        [
+          "Pi1",
+          17
+        ]
+      ],
+      "monitor": [
+        [
+          "M1",
+          5
+        ],
+        [
+          "M1",
+          6
+        ],
+        [
+          "M1",
+          19
+        ],
+        [
+          "Pi1",
+          17
+        ]
+      ],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 4,
+      "union_pairs": 4,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Discusion sobre falsedad en mensajes de handoff: German planteo si las afirmaciones verbales engañosas en handoff debian codificarse como operador. Se acordo que los operadores de B solo aplican a tramos formales de prompt, memoria y herramientas, no al contenido libre de mensajes en lenguaje natural. Se confirman los cuatro operadores tecnicos."
+    },
+    {
+      "session_id": "W10-R1",
+      "reviewer_a": [
+        [
+          "P1",
+          2
+        ]
+      ],
+      "reviewer_b": [
+        [
+          "P1",
+          2
+        ]
+      ],
+      "consensus": [
+        [
+          "P1",
+          2
+        ]
+      ],
+      "automatic": [
+        [
+          "P1",
+          2
+        ]
+      ],
+      "monitor": [
+        [
+          "P1",
+          2
+        ]
+      ],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 1,
+      "union_pairs": 1,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Sin discrepancias"
+    },
+    {
+      "session_id": "W11-R1",
+      "reviewer_a": [
+        [
+          "M1",
+          14
+        ],
+        [
+          "P3",
+          11
+        ]
+      ],
+      "reviewer_b": [
+        [
+          "M1",
+          14
+        ],
+        [
+          "P3",
+          11
+        ]
+      ],
+      "consensus": [
+        [
+          "M1",
+          14
+        ],
+        [
+          "P3",
+          11
+        ]
+      ],
+      "automatic": [
+        [
+          "M1",
+          14
+        ],
+        [
+          "P3",
+          11
+        ]
+      ],
+      "monitor": [
+        [
+          "M1",
+          14
+        ],
+        [
+          "P3",
+          11
+        ]
+      ],
+      "initial_exact_match": true,
+      "initial_binary_match": true,
+      "intersection_pairs": 2,
+      "union_pairs": 2,
+      "consensus_reference_match": true,
+      "consensus_monitor_match": true,
+      "consensus_task_match": true,
+      "task_raters_match": true,
+      "resolution": "Sin discrepancias"
+    }
+  ]
+}

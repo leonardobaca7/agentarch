@@ -1,0 +1,35 @@
+[
+  {
+    "DOI": "10.1145/3805621.3807648",
+    "page": "1-12",
+    "publisher": "ACM",
+    "title": [
+      "C\n                    <scp>law</scp>\n                    VM: Harness-Managed Virtual Memory for Stateful Tool-Using LLM Agents"
+    ],
+    "container-title": [
+      "Proceedings of the Sixth European Workshop on Machine Learning and Systems"
+    ]
+  },
+  {
+    "DOI": "10.1109/icaiset66439.2026.11541707",
+    "page": "1-6",
+    "publisher": "IEEE",
+    "title": [
+      "Trust-Aware Runtime Verification for Autonomous LLM Agent Systems"
+    ],
+    "container-title": [
+      "2026 International Conference on Artificial Intelligence, Systems, and Emerging Technologies (ICAISET)"
+    ]
+  },
+  {
+    "DOI": "10.5220/0014236700004058",
+    "page": "33-44",
+    "publisher": "SCITEPRESS - Science and Technology Publications",
+    "title": [
+      "Bridging MDE and LLM-Based Agent Frameworks for Multi-Agent Systems: A Quasi-Systematic Review and Metamodel"
+    ],
+    "container-title": [
+      "Proceedings of the 14th International Conference on Model-Based Software and Systems Engineering"
+    ]
+  }
+]
