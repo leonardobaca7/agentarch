@@ -15,7 +15,7 @@ Official reference implementation and companion research artifact for the paper:
 
 ## ⚡ Reproducción Rápida con un Solo Comando
 
-Para ejecutar la suite completa de 50 escenarios, evaluar las tres líneas base ($B_1$, $B_2$, $B_{\text{prop}}$), calcular las métricas cuantitativas y generar los artefactos en `results/` y `paper_assets/`:
+Para ejecutar la suite guionizada de 50 escenarios y evaluar las tres configuraciones ($B_1$, $B_2$, $B_{\text{prop}}$), calcular las métricas cuantitativas y generar los artefactos en `results/` y `paper_assets/`:
 
 ```bash
 git clone https://github.com/leonardobaca7/agentarch.git
@@ -33,7 +33,7 @@ Los sistemas multi-agente (MAS) basados en modelos de lenguaje de gran escala (L
 **AgentArch** introduce un marco formal y determinista de chequeo de conformidad sobre trazas OpenTelemetry:
 * **Espacio de Comportamiento $B = \langle P, M, \Pi \rangle$:** Modela formalmente directivas de prompt versionadas criptográficamente con SHA-256 ($P$), estados de memoria gobernados deterministamente ($M$) y reglas de precedencia causal entre herramientas ($\Pi$).
 * **Taxonomía de 9 Operadores de Deriva:** Detecta supresión obligatoria ($P_1$), inyección de conflicto ($P_2$), alteración criptográfica ($P_3$), admisión no verificada ($M_1$), sobrescritura destructiva ($M_2$), lecturas caducadas por TTL ($M_3$), herramientas no permitidas ($\Pi_1$), límites de argumentos ($\Pi_2$) e inversiones de precedencia ($\Pi_3$).
-* **Monitor Pasivo Streaming (`AgentArchSpanProcessor`):** Intercepta tramos en `on_end(span)` y emite alertas estructuradas a una cola de auditoría asíncrona ($\mathcal{Q}_{\text{audit}}$) sin suspender, bloquear ni reescribir la inferencia del modelo.
+* **Monitor pasivo:** el núcleo JavaScript evalúa tramos en `onEnd(span)` y encola eventos. El adaptador `AgentArchOtelProcessor` recibe tramos del SDK y mantiene estado por traceId. La exportación del piloto es local y síncrona.
 * **Microbenchmark del verificador:** mide llamadas directas a onEnd sobre tramos sintéticos conformes. Los resultados y el entorno están en results/.
 
 ---
@@ -133,6 +133,61 @@ y carga las tablas generadas desde paper_assets/. Desde el directorio paper,
 compilar con pdflatex articulo.tex dos veces para resolver las referencias cruzadas.
 
 ---
+
+## Piloto con inferencia real
+
+Se ejecutó Qwen3-0.6B-Q8_0 mediante llama.cpp b12704 y se capturaron tramos con
+OpenTelemetry SDK 2.12.1. Ocho solicitudes se repitieron tres veces a temperatura
+cero. Los 24 planes fueron válidos y produjeron 78 tramos. Cada sesión asignó
+un rol y ejecutó las llamadas generadas en herramientas locales de prueba.
+
+| Configuración | Derivas detectadas | Alertas en sesiones conformes | Primer paso correcto |
+| --- | ---: | ---: | ---: |
+| B1 | 0/12 | 0/12 | 0/12 |
+| B2 | 6/12 | 0/12 | 6/12 |
+| AgentArch | 12/12 | 0/12 | 12/12 |
+
+Las réplicas de cada solicitud produjeron el mismo plan. La diversidad efectiva
+es de ocho planes, cuatro conformes y cuatro con infracciones. Las etiquetas
+provienen de un oráculo separado aplicado a las acciones observadas. El piloto
+abarca permisos, argumentos y precedencia de herramientas. La cobertura completa
+de las nueve reglas se comprueba en la suite guionizada.
+
+El [protocolo](docs/live_pilot_protocol.md) documenta modelo, hash, equipo,
+parámetros y reproducción. [Los datos crudos](results/live_pilot/) conservan
+peticiones, respuestas, tramos, etiquetas y alertas.
+
+~~~powershell
+npm ci
+node tests/test_live_integration.js
+node experiments/verify_live_artifacts.js
+~~~
+
+El protocolo indica cómo iniciar el servidor y ejecutar una nueva medición en un
+directorio distinto para preservar los datos. La conexión al modelo propaga los
+errores de red y formato. La configuración usa herramientas locales de prueba.
+
+## Supuestos y límites
+
+El 100 % de la suite guionizada describe la cobertura de los casos preparados.
+Las repeticiones y la evaluación con un único modelo limitan la generalización.
+Para cero alertas en diez nominales, el límite binomial unilateral exacto al 95 %
+sería 25,9 % bajo independencia. Los nominales repetidos debilitan ese supuesto.
+
+La prueba de [metadatos incorrectos](results/instrumentation_sensitivity.json)
+muestra que un resumen canónico obsoleto puede ocultar P3 y una marca verified
+incorrecta puede ocultar M1. Se regenera con node experiments/instrumentation_sensitivity.js.
+
+## Versión y artículo
+
+La etiqueta v0.2.0-c2-review fija esta revisión. bd1c1a1 identifica el código del
+microbenchmark original, 73dd953 incorpora esos resultados y el primer manuscrito
+y 647f45f identifica el ejecutor del piloto del modelo. Los tiempos guardados
+corresponden a sus respectivas ejecuciones.
+
+[El fuente IEEE](paper/articulo.tex) incorpora el piloto, el análisis de
+incertidumbre y trabajo futuro explícito. Las correcciones están documentadas
+en [la respuesta a la auditoría](docs/respuesta_revision_c2.md).
 
 ## 👥 Autores y Contacto
 

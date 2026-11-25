@@ -168,19 +168,20 @@ function runFullEvaluation() {
 
     const rows = Object.entries(summaryData.metrics);
     const tableRow = (cells) => cells.join(' & ') + String.raw`\\`;
-    const table = (caption, label, alignment, header, body) => [
-        String.raw`\begin{table}[!t]`,
+    const table = (caption, label, alignment, header, body, wide = false) => [
+        wide ? String.raw`\begin{table*}[!t]` : String.raw`\begin{table}[!t]`,
         String.raw`\caption{` + caption + '}',
         String.raw`\label{` + label + '}',
         String.raw`\centering\footnotesize`,
-        String.raw`\begin{tabular}{` + alignment + '}',
+        wide ? String.raw`\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}` + alignment + '}'
+            : String.raw`\begin{tabular}{` + alignment + '}',
         String.raw`\hline`,
         tableRow(header),
         String.raw`\hline`,
         ...body.map(tableRow),
         String.raw`\hline`,
-        String.raw`\end{tabular}`,
-        String.raw`\end{table}`,
+        wide ? String.raw`\end{tabular*}` : String.raw`\end{tabular}`,
+        wide ? String.raw`\end{table*}` : String.raw`\end{table}`,
         ''
     ].join('\n');
     const names = { B1: '$B_1$', B2: '$B_2$', B_prop: 'AgentArch' };
@@ -198,7 +199,7 @@ function runFullEvaluation() {
     const texTable = table('Casos detectados por dimensión', 'tab:category_results', 'lrrr',
         ['Variante', 'Prompts', 'Memoria', 'Políticas'], categoryRows)
         + table(String.raw`Resultados globales (métricas en \%)`, 'tab:experimental_results', 'lrrrrrrr',
-            ['Variante', 'VP', 'FP', 'FN', 'Prec.', 'Exh.', '$F_1$', '$t^*$'], globalRows);
+            ['Variante', 'VP', 'FP', 'FN', 'Prec.', 'Exh.', '$F_1$', '$t^*$'], globalRows, true);
     fs.writeFileSync(path.join(__dirname, '../paper_assets/tabla_iv_resultados.tex'), texTable, 'utf8');
 
     // Ejecutar benchmark de latencia

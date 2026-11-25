@@ -6,7 +6,10 @@
   "scripts": {
     "test": "node experiments/run_evaluation.js",
     "eval": "node experiments/run_evaluation.js",
-    "bench": "node experiments/benchmark_latency.js"
+    "bench": "node experiments/benchmark_latency.js",
+    "test:unit": "node tests/test_drift_operators.js && node tests/test_live_integration.js",
+    "eval:live": "node experiments/run_live_evaluation.js",
+    "eval:metadata": "node experiments/instrumentation_sensitivity.js"
   },
   "keywords": [
     "multi-agent-systems",

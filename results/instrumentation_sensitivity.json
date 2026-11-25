@@ -1,0 +1,30 @@
+[
+  {
+    "fault": "altered_prompt_text",
+    "metadata": "faithful_changed_digest",
+    "expectedActualOperator": "P3",
+    "reportedOperators": [
+      "P3"
+    ]
+  },
+  {
+    "fault": "altered_prompt_text",
+    "metadata": "stale_canonical_digest",
+    "expectedActualOperator": "P3",
+    "reportedOperators": []
+  },
+  {
+    "fault": "unsupported_memory_write",
+    "metadata": "verified_false",
+    "expectedActualOperator": "M1",
+    "reportedOperators": [
+      "M1"
+    ]
+  },
+  {
+    "fault": "unsupported_memory_write",
+    "metadata": "incorrect_verified_true",
+    "expectedActualOperator": "M1",
+    "reportedOperators": []
+  }
+]
