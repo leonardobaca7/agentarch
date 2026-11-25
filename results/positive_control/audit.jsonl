@@ -1,0 +1,2 @@
+{"trace_id":"2f1cea601aaff88e54ec5cc266adbc51","span_id":"02f9c30de7ccb9d1","step":2,"timestamp":1795611795652.7468,"status":"DRIFT_DETECTED","violations":[{"op":"P1","target":"OrderTriage","msg":"Falta directiva obligatoria: clause_auth"}]}
+{"trace_id":"07f610d96f86dd2273e5fa37c10933ba","span_id":"2ae2d90171ec50b2","step":14,"timestamp":1795611795670.3948,"status":"DRIFT_DETECTED","violations":[{"op":"P3","target":"BillingAgent","msg":"Digest alterado en directiva: clause_warranty_terms"}]}

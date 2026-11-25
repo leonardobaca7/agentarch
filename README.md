@@ -184,6 +184,9 @@ tarea es la solicitud: son doce grupos de cinco muestras.
 
 El anotador implementa las mismas políticas mediante código separado. Estos
 resultados verifican concordancia y no validación independiente de las políticas.
+Seis solicitudes son peticiones benignas: ese nombre describe la intención del
+usuario. Sus ejecuciones produjeron infracciones en 27 de 30 sesiones y no deben
+confundirse con trayectorias conformes.
 Los cuatro tipos observados fuera de herramientas son P1, P3, M1 y M2; P2 y M3
 no aparecieron. W10/W11 introducen perturbaciones de prompt en diez sesiones;
 otras 47 sesiones presentan infracciones sin esas perturbaciones.
@@ -207,7 +210,9 @@ node experiments/analyze_multiagent.js
 
 Para repetir la inferencia se requiere iniciar el servidor indicado en el
 protocolo y elegir un directorio de salida nuevo. El análisis regenera las
-tablas VI–VIII y comprueba las relaciones entre peticiones, tramos y resultados.
+tablas de detección, operadores y solicitudes y comprueba las relaciones entre
+peticiones, tramos y resultados. WORKFLOW_ASSET_DIR permite mantener separadas
+las tablas de otros conjuntos.
 
 La nueva medición temporal usa cien lotes de mil llamadas en seis caminos.
 La cola se consume fuera del intervalo cronometrado y se comprueba el número
@@ -221,12 +226,57 @@ Jeronimo. El artículo diferencia ambos trabajos. Los atributos agentarch.* son
 una extensión de dominio; la integración con el SDK no implica conformidad
 completa con todas las convenciones semánticas GenAI.
 
+## Correcciones de la auditoría consolidada
+
+Los doce planes escritos a mano completaron las doce tareas utilizando el mismo
+ejecutor, servicios, memoria y criterio de finalización. Diez fueron conformes;
+W10/W11 conservaron las perturbaciones de prompt y sus alertas. Estos controles
+validan trayectorias posibles del arnés y permanecen separados de las sesiones
+generadas por modelos.
+
+M1 concentra 84 de 141 pares de operador y paso (59,6 %). Al filtrar etiquetas
+y alertas y recalcular el primer paso se obtiene:
+
+| Conjunto | Sesiones | Con infracciones | Conformes | Pares coincidentes | Primer paso correcto |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Completo | 60 | 57 | 3 | 141/141 | 57/57 |
+| Sin M1 | 60 | 38 | 22 | 57/57 | 38/38 |
+| Sin W10/W11 | 50 | 47 | 3 | 112/112 | 47/47 |
+| Sin ambos | 50 | 28 | 22 | 38/38 | 28/28 |
+
+Todas las variantes tienen cero FP y FN respecto de su criterio filtrado.
+Las 22 sesiones conformes sin M1 no son negativos adicionales del monitor completo.
+Los resultados están en [consolidated_analysis](results/consolidated_analysis/).
+
+El [protocolo consolidado](docs/consolidated_audit_protocol.md) fija también
+una muestra de doce solicitudes con Qwen3-1.7B-Q8_0, a temperatura 0,7 y semilla
+100. Los [datos](results/larger_model/) conservan todas las respuestas. El contraste
+se realiza con la primera muestra de las mismas solicitudes de Qwen3-0.6B.
+La tabla de controles y modelos del artículo informa sus resultados efectivos.
+Las doce sesiones de Qwen3-1.7B fueron válidas, pero ninguna fue conforme ni
+completó la tarea. En la primera muestra del modelo pequeño hubo una conforme
+y cero tareas completas. El tamaño mayor no mejoró la finalización observada.
+
+El benchmark complementario mide lectura vigente y expirada y la entrada al
+adaptador del SDK. Este último usa objetos con la forma de ReadableSpan e incluye
+conversión, búsqueda, comprobación, drenaje y callback; excluye crear y exportar
+tramos. Las diferencias entre los tiempos históricos no son una comparación
+emparejada ni prueban una aceleración. Ambos benchmarks históricos calentaban
+cada lote. Sus percentiles son percentiles de medias de lote.
+
+La [revisión humana](docs/procedimiento_revision_humana.md) sigue pendiente.
+Se entregan diez sesiones con su contexto y un formulario sin completar. Una
+revisión del asistente no se presenta como validación humana.
+
 ## Supuestos y límites
 
 El 100 % de la suite guionizada describe la cobertura de los casos preparados.
-Las repeticiones y la evaluación con un único modelo limitan la generalización.
+Las repeticiones y la comparación exploratoria con modelos pequeños limitan la generalización.
 Para cero alertas en diez nominales, el límite binomial unilateral exacto al 95 %
 sería 25,9 % bajo independencia. Los nominales repetidos debilitan ese supuesto.
+Para los tres conformes de la ampliación, cero FP daría una cota ilustrativa de
+63,2 % bajo independencia. Proceden de solo dos solicitudes. No se agrupan
+negativos de corpus, controles y modelos como si fueran una sola población.
 
 La prueba de [metadatos incorrectos](results/instrumentation_sensitivity.json)
 muestra que un resumen canónico obsoleto puede ocultar P3 y una marca verified
@@ -234,16 +284,20 @@ incorrecta puede ocultar M1. Se regenera con node experiments/instrumentation_se
 
 ## Versión y artículo
 
-La etiqueta v0.3.0-c2-second-review fija la segunda revisión y conserva la
-anterior, v0.2.0-c2-review. cd6dc65 identifica el ejecutor y protocolo de la
+La etiqueta v0.4.0-consolidated-review fija la auditoría consolidada y conserva
+v0.3.0-c2-second-review y v0.2.0-c2-review. cd6dc65 identifica benchmark_paths.js
+y el ejecutor y protocolo de la
 ampliación. bd1c1a1 identifica el código del
 microbenchmark original, 73dd953 incorpora esos resultados y el primer manuscrito
 y 647f45f identifica el ejecutor del piloto del modelo. Los tiempos guardados
-corresponden a sus respectivas ejecuciones.
+corresponden a sus respectivas ejecuciones. f93051a fija analyze_multiagent.js;
+9261a10 añade control y modelo configurable; 9ca896f incorpora exclusiones y el
+benchmark complementario. La [verificación de fuentes](docs/verificacion_fuentes_consolidada.md)
+documenta las referencias cuestionadas y la detección de MIT por GitHub.
 
 [El fuente IEEE](paper/articulo.tex) y [el PDF](paper/articulo.pdf) incorporan
 ambas evaluaciones, los límites del etiquetado automático y los resultados de
-tarea. Las correcciones están documentadas en [la respuesta a la segunda auditoría](docs/respuesta_segunda_auditoria.md).
+tarea. Las correcciones actuales están documentadas en [la respuesta consolidada](docs/respuesta_auditoria_consolidada.md).
 
 ## 👥 Autores y Contacto
 

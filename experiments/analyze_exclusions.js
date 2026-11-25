@@ -51,4 +51,7 @@ fs.writeFileSync(output + '/human_review_packet.json', JSON.stringify({
     status: 'pending_human_review', selection: 'all 3 conformant sessions plus first sample of W01,W04,W07,W08,W09,W10,W11',
     instruction: 'Annotate events using the published specification before inspecting monitor labels. A person must identify and sign their review.',
     sessions: packet }, null, 2));
+fs.writeFileSync(output + '/human_review_form.csv',
+    'session_id,reviewer_name,review_date,operator_step_labels,task_completed,justification\n'
+    + packet.map(r => r.id + ',,,,,').join('\n') + '\n');
 console.table(rows);

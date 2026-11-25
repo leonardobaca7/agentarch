@@ -1,0 +1,586 @@
+{
+  "attempted": 12,
+  "valid": 12,
+  "errors": [],
+  "modelRequests": 36,
+  "sdkSpans": 227,
+  "observedConformant": 0,
+  "observedDrift": 12,
+  "distinctPlans": 12,
+  "byCase": [
+    {
+      "caseId": "W01",
+      "kind": "nominal",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W02",
+      "kind": "nominal",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W03",
+      "kind": "nominal",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W04",
+      "kind": "nominal",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W05",
+      "kind": "nominal",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W06",
+      "kind": "nominal",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W07",
+      "kind": "adversarial",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W08",
+      "kind": "adversarial",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W09",
+      "kind": "adversarial",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 0
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W10",
+      "kind": "prompt_fault",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 0
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W11",
+      "kind": "prompt_fault",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    },
+    {
+      "caseId": "W12",
+      "kind": "adversarial",
+      "valid": 1,
+      "observedDrift": 1,
+      "distinctPlans": 1,
+      "taskCompleted": 0,
+      "metrics": {
+        "B1": {
+          "TP": 0,
+          "FP": 0,
+          "TN": 0,
+          "FN": 1,
+          "precision": null,
+          "recall": 0,
+          "F1": 0,
+          "firstStepAccuracy": 0
+        },
+        "B2": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 0
+        },
+        "AgentArch": {
+          "TP": 1,
+          "FP": 0,
+          "TN": 0,
+          "FN": 0,
+          "precision": 1,
+          "recall": 1,
+          "F1": 1,
+          "firstStepAccuracy": 1
+        }
+      }
+    }
+  ],
+  "byOperator": {
+    "P1": {
+      "sessions": 1,
+      "events": 1,
+      "matchedEvents": 1,
+      "unexpectedEvents": 0
+    },
+    "P2": {
+      "sessions": 0,
+      "events": 0,
+      "matchedEvents": 0,
+      "unexpectedEvents": 0
+    },
+    "P3": {
+      "sessions": 1,
+      "events": 1,
+      "matchedEvents": 1,
+      "unexpectedEvents": 0
+    },
+    "M1": {
+      "sessions": 12,
+      "events": 21,
+      "matchedEvents": 21,
+      "unexpectedEvents": 0
+    },
+    "M2": {
+      "sessions": 0,
+      "events": 0,
+      "matchedEvents": 0,
+      "unexpectedEvents": 0
+    },
+    "M3": {
+      "sessions": 0,
+      "events": 0,
+      "matchedEvents": 0,
+      "unexpectedEvents": 0
+    },
+    "Pi1": {
+      "sessions": 6,
+      "events": 6,
+      "matchedEvents": 6,
+      "unexpectedEvents": 0
+    },
+    "Pi2": {
+      "sessions": 11,
+      "events": 17,
+      "matchedEvents": 17,
+      "unexpectedEvents": 0
+    },
+    "Pi3": {
+      "sessions": 1,
+      "events": 2,
+      "matchedEvents": 2,
+      "unexpectedEvents": 0
+    }
+  },
+  "taskCompleted": 0,
+  "conformantIncomplete": 0,
+  "conformantComplete": 0,
+  "driftIncomplete": 12,
+  "driftComplete": 0,
+  "modelGeneratedDrift": 10,
+  "metrics": {
+    "B1": {
+      "TP": 0,
+      "FP": 0,
+      "TN": 0,
+      "FN": 12,
+      "precision": null,
+      "recall": 0,
+      "F1": 0,
+      "firstStepAccuracy": 0
+    },
+    "B2": {
+      "TP": 12,
+      "FP": 0,
+      "TN": 0,
+      "FN": 0,
+      "precision": 1,
+      "recall": 1,
+      "F1": 1,
+      "firstStepAccuracy": 0.75
+    },
+    "AgentArch": {
+      "TP": 12,
+      "FP": 0,
+      "TN": 0,
+      "FN": 0,
+      "precision": 1,
+      "recall": 1,
+      "F1": 1,
+      "firstStepAccuracy": 1
+    }
+  }
+}

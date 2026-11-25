@@ -169,7 +169,7 @@ function runFullEvaluation() {
     const rows = Object.entries(summaryData.metrics);
     const tableRow = (cells) => cells.join(' & ') + String.raw`\\`;
     const table = (caption, label, alignment, header, body, wide = false) => [
-        wide ? String.raw`\begin{table*}[!t]` : String.raw`\begin{table}[!t]`,
+        wide ? String.raw`\begin{table*}[!t]` : String.raw`\begin{table}[H]`,
         String.raw`\caption{` + caption + '}',
         String.raw`\label{` + label + '}',
         String.raw`\centering\footnotesize`,

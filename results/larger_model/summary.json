@@ -1,0 +1,40 @@
+{
+  "attempted": 12,
+  "valid": 12,
+  "errors": [],
+  "observedConformant": 0,
+  "observedDrift": 12,
+  "taskCompleted": 0,
+  "metrics": {
+    "B1": {
+      "TP": 0,
+      "FP": 0,
+      "TN": 0,
+      "FN": 12,
+      "precision": null,
+      "recall": 0,
+      "F1": 0,
+      "firstStepAccuracy": 0
+    },
+    "B2": {
+      "TP": 12,
+      "FP": 0,
+      "TN": 0,
+      "FN": 0,
+      "precision": 1,
+      "recall": 1,
+      "F1": 1,
+      "firstStepAccuracy": 0.75
+    },
+    "AgentArch": {
+      "TP": 12,
+      "FP": 0,
+      "TN": 0,
+      "FN": 0,
+      "precision": 1,
+      "recall": 1,
+      "F1": 1,
+      "firstStepAccuracy": 1
+    }
+  }
+}

@@ -12,7 +12,10 @@
     "eval:metadata": "node experiments/instrumentation_sensitivity.js",
     "eval:workflow": "node experiments/run_multiagent_evaluation.js",
     "analyze:workflow": "node experiments/analyze_multiagent.js",
-    "bench:paths": "node experiments/benchmark_paths.js"
+    "bench:paths": "node experiments/benchmark_paths.js",
+    "bench:supplement": "node experiments/benchmark_supplement.js",
+    "analyze:exclusions": "node experiments/analyze_exclusions.js",
+    "analyze:consolidated": "node experiments/analyze_consolidated.js"
   },
   "keywords": [
     "multi-agent-systems",

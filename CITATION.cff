@@ -10,8 +10,8 @@ authors:
     given-names: "German Arturo"
     affiliation: "Universidad Nacional de San Agustín de Arequipa (UNSA)"
     email: "gchipanaj@unsa.edu.pe"
-version: 0.3.0
-date-released: 2026-11-24
+version: 0.4.0
+date-released: 2026-11-25
 url: "https://github.com/leonardobaca7/agentarch"
 repository-code: "https://github.com/leonardobaca7/agentarch"
 keywords:

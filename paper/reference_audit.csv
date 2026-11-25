@@ -1,12 +1,12 @@
 number,key,title,verification_source,edition_note
 1,li,What do we architect when we architect LLM agent systems?,https://doi.org/10.1145/3774748.3795870,Publisher or official software/model metadata
-2,miranda,Bridging MDE and LLM-based agent frameworks for multi-agent systems: A quasi-systematic review and metamodel,https://doi.org/10.5220/0014236700004058,Publisher or official software/model metadata; MODELSWARD forum name confirmed in SciTePress
+2,miranda,Bridging MDE and LLM-based agent frameworks for multi-agent systems: A quasi-systematic review and metamodel,https://doi.org/10.5220/0014236700004058,SciTePress reconfirmed 2026-11-25: MODELSWARD forum name and pp.33-44
 3,lu,Towards responsible generative AI: A reference architecture for designing foundation model based agents,https://doi.org/10.48550/arXiv.2311.13148,Precise arXiv edition in local corpus
 4,liu,Agent design pattern catalogue: A collection of architectural patterns for foundation model based agents,https://doi.org/10.48550/arXiv.2405.10467,Precise arXiv edition in local corpus
 5,sallma,SALLMA: A software architecture for LLM-based multi-agent systems,https://doi.org/10.1109/SATrends66715.2025.00006,Publisher or official software/model metadata
 6,deangelis,Detecting architectural drift in safety-critical firmware through runtime trace analysis,https://doi.org/10.48550/arXiv.2607.03135,Precise arXiv edition in local corpus
-7,conformance,Conformance checking of processes based on monitoring real behavior,https://doi.org/10.1016/j.is.2007.07.001,Publisher or official software/model metadata
-8,rv,Introduction to runtime verification,https://doi.org/10.1007/978-3-319-75632-5_1,Publisher or official software/model metadata
+7,conformance,Conformance checking of processes based on monitoring real behavior,https://doi.org/10.1016/j.is.2007.07.001,"TU Eindhoven reconfirmed 2026-11-25: journal, pp.64-95 and DOI"
+8,rv,Introduction to runtime verification,https://doi.org/10.1007/978-3-319-75632-5_1,"Springer reconfirmed 2026-11-25: four authors, LNCS10457, pp.1-33 and chapter DOI"
 9,contracts,"A trace-based assurance framework for agentic AI orchestration: Contracts, testing, and governance",https://doi.org/10.48550/arXiv.2603.18096,Precise arXiv edition in local corpus
 10,agentspec,AgentSpec: Customizable runtime enforcement for safe and reliable LLM agents,https://doi.org/10.1145/3744916.3764546,Publisher or official software/model metadata
 11,mcp,Runtime policy enforcement for MCP-based LLM agents,https://doi.org/10.3390/electronics15132829,Publisher or official software/model metadata
@@ -22,13 +22,14 @@ number,key,title,verification_source,edition_note
 21,survey,A survey for LLM agent trajectory analysis: From failure attribution to enhancement,https://doi.org/10.1109/TSE.2026.3717765,Publisher or official software/model metadata
 22,barrak,Traceability and accountability in role-specialized multi-agent LLM pipelines,https://doi.org/10.48550/arXiv.2510.07614,Precise arXiv edition in local corpus
 23,prompts,Prompting in the wild: An empirical study of prompt evolution in software repositories,https://doi.org/10.1109/MSR66628.2025.00106,Publisher or official software/model metadata
-24,claw,ClawVM: Harness-managed virtual memory for stateful tool-using LLM agents,https://doi.org/10.1145/3805621.3807648,Publisher or official software/model metadata; page range reconfirmed in Crossref on 2026-11-24
-25,govmem,When not to write memory: Governing false promotion from correlated agent traces,https://doi.org/10.48550/arXiv.2607.02579,Precise arXiv edition in local corpus
+24,claw,ClawVM: Harness-managed virtual memory for stateful tool-using LLM agents,https://doi.org/10.1145/3805621.3807648,ACM-deposited Crossref metadata reconfirmed 2026-11-25: pp.1-12
+25,govmem,When not to write memory: Governing false promotion from correlated agent traces,https://doi.org/10.48550/arXiv.2607.02579,Deliberate citation of arXiv2607.02579v1; arXiv notes MLISE acceptance; no proceedings pagination inferred
 26,memarch,MemArchitect: A policy driven memory governance layer,https://doi.org/10.48550/arXiv.2603.18330,Precise arXiv edition in local corpus
-27,tarv,Trust-aware runtime verification for autonomous LLM agent systems,https://doi.org/10.1109/ICAISET66439.2026.11541707,Publisher or official software/model metadata; page range reconfirmed in Crossref on 2026-11-24
+27,tarv,Trust-aware runtime verification for autonomous LLM agent systems,https://doi.org/10.1109/ICAISET66439.2026.11541707,IEEE-deposited Crossref metadata reconfirmed 2026-11-25: pp.1-6
 28,tracecaps,TraceCaps: Inline provenance and risk enforcement for agentic software engineering,https://doi.org/10.1145/3786582.3786832,Publisher or official software/model metadata
-29,enterpriseagentarch,AgentArch: A benchmark for evaluating agent architectures in enterprise workflows,https://doi.org/10.18653/2026.aacl-long.44,Publisher or official software/model metadata
+29,enterpriseagentarch,AgentArch: A benchmark for evaluating agent architectures in enterprise workflows,https://doi.org/10.18653/2026.aacl-long.44,ACL Anthology reconfirmed 2026-11-25: DOI10.18653/2026.aacl-long.44 without v1/; pp.915-933
 30,otel,OpenTelemetry JavaScript instrumentation,https://opentelemetry.io/docs/languages/js/instrumentation/,Publisher or official software/model metadata
-31,genaisemconv,GenAI semantic conventions,https://github.com/open-telemetry/semantic-conventions-genai/tree/main/docs/gen-ai,Publisher or official software/model metadata
+31,genaisemconv,GenAI semantic conventions,https://github.com/open-telemetry/semantic-conventions-genai/tree/main/docs/gen-ai,Official open-telemetry repository and directory reconfirmed 2026-11-25
 32,qwen,Qwen3-0.6B-GGUF,https://huggingface.co/Qwen/Qwen3-0.6B-GGUF,Publisher or official software/model metadata
 33,llamacpp,llama.cpp,https://github.com/ggml-org/llama.cpp/releases/tag/b12704,Publisher or official software/model metadata
+34,qwenlarger,Qwen3-1.7B-GGUF,https://huggingface.co/Qwen/Qwen3-1.7B-GGUF,Official Q8_0 SHA-256 verified 2026-11-25

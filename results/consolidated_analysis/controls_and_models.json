@@ -1,0 +1,35 @@
+[
+  {
+    "name": "Control escrito a mano",
+    "sessions": 12,
+    "conformant": 10,
+    "completed": 12,
+    "stock": 12,
+    "finance": 12,
+    "address": 12,
+    "detected": 2,
+    "drift": 2
+  },
+  {
+    "name": "Qwen3-0.6B, muestra 1",
+    "sessions": 12,
+    "conformant": 1,
+    "completed": 0,
+    "stock": 0,
+    "finance": 1,
+    "address": 10,
+    "detected": 11,
+    "drift": 11
+  },
+  {
+    "name": "Qwen3-1.7B, muestra 1",
+    "sessions": 12,
+    "conformant": 0,
+    "completed": 0,
+    "stock": 0,
+    "finance": 1,
+    "address": 11,
+    "detected": 12,
+    "drift": 12
+  }
+]

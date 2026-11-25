@@ -5,7 +5,7 @@
 \usepackage{amsmath}
 \usepackage{url}
 \usepackage{flafter}
-\usepackage{placeins}
+\usepackage{float}
 
 \title{Detección de deriva arquitectónica en sistemas multiagente basados en modelos de lenguaje mediante chequeo de conformidad sobre trazas}
 \author{\IEEEauthorblockN{Leonardo Baca Calsin y German Arturo Chipana Jeronimo}
@@ -15,13 +15,14 @@ lbacac@unsa.edu.pe, gchipanaj@unsa.edu.pe}}
 \newcommand{\boxstep}[1]{\fbox{\strut\footnotesize #1}}
 \newcommand{\downstep}{\\[-1pt]$\downarrow$\\[-1pt]}
 \renewcommand{\IEEEkeywordsname}{Palabras clave}
-\newcommand{\arch}{\textsc{AgentArch}}
+\newcommand{\arch}{AgentArch}
 
 \input{../paper_assets/metricas_ampliacion.tex}
+\input{../paper_assets/metricas_modelo_mayor.tex}
 \begin{document}
 \maketitle
 \begin{abstract}
-Los agentes basados en modelos de lenguaje pueden ejecutar acciones incompatibles con su diseño. Presentamos \arch, un monitor pasivo que contrasta trazas con una especificación de prompts, memoria y políticas mediante nueve operadores. En 50 escenarios guionizados cubrió las 40 derivas preparadas, con cero alertas en diez nominales. Ampliamos la evaluación con tres roles que intercambian mensajes, resultados y memoria en una misma sesión. Doce solicitudes se muestrearon cinco veces a temperatura 0,7 con Qwen3-0.6B. Se obtuvieron \WorkflowValid{} sesiones válidas de \WorkflowAttempted{} intentos y \WorkflowDistinct{} planes distintos. El anotador registró \WorkflowDrift{} sesiones con infracciones y el monitor detectó \WorkflowDetected{}. Ese anotador codifica las mismas políticas y permite comprobar concordancia de implementación. Una medida adicional de efectos del pedido encontró \WorkflowTaskComplete{} tareas completas y \WorkflowConformantIncomplete{} sesiones conformes con tareas incompletas. La prueba de metadatos documenta omisiones por evidencia incorrecta. El microbenchmark compara caminos conformes y con alerta mediante mediana y percentiles de medias por lote. Los resultados delimitan la cobertura observada y la diferencia entre conformidad de reglas y finalización de la tarea.
+Presentamos AgentArch, un monitor pasivo de deriva arquitectónica que contrasta trazas con nueve reglas de prompts, memoria y herramientas. El corpus guionizado cubre 40 infracciones preparadas. La evaluación con Qwen3-0.6B comprende doce solicitudes, cinco muestras por solicitud y tres roles que intercambian mensajes y memoria. El monitor coincide con el anotador en 57 sesiones con infracciones; ambos codifican las mismas políticas, por lo que el resultado expresa consistencia de implementación. M1 concentra el 59,6\% de los pares etiquetados. Al excluir esa regla y las diez sesiones con prompts perturbados, coincide en las 28 sesiones restantes con infracciones. Ninguna de las 60 sesiones completa el pedido; doce controles escritos a mano sí lo completan mediante el mismo ejecutor. Los tres casos conformes aportan evidencia insuficiente para estimar falsos positivos. Se añaden un contraste exploratorio con un modelo mayor y mediciones de lectura y adaptador, expresadas como percentiles de medias de lote. Los resultados delimitan la cobertura observada y distinguen conformidad de reglas, calidad de la instrumentación y finalización de tarea.
 \end{abstract}
 \begin{IEEEkeywords}
 deriva arquitectónica, sistemas multiagente, modelos de lenguaje, chequeo de conformidad, trazas, OpenTelemetry
@@ -39,6 +40,8 @@ Las contribuciones comprenden la especificación \(B=\langle P,M,\Pi\rangle\), n
 \section{Trabajos relacionados}
 La revisión inicial comprende 26 documentos del corpus local del proyecto. Se incluyeron trabajos cuyo objeto fuera arquitectura de agentes LLM, verificación, observabilidad, evolución de prompts, memoria o procedencia, y que describieran conceptos, mecanismos o evaluación pertinentes para las reglas propuestas. Es una selección dirigida de documentos disponibles, con posible sesgo de selección. La revisión se amplía con fundamentos de conformidad y verificación y con el trabajo que comparte el nombre del artefacto. La Tabla~\ref{tab:related} resume esos ejes.
 
+Se partió de los PDF reunidos por los autores y se agruparon por esos ejes; los títulos y metadatos se contrastaron con las fuentes de las referencias. No se conserva un registro de búsquedas, bases consultadas, consultas o descartes que permita reconstruir la recuperación original. Por ello se presenta como revisión narrativa de un corpus disponible, sin atribuirle exhaustividad ni un protocolo sistemático retrospectivo.
+
 \begin{table*}[!t]
 \caption{Ejes de la revisión de literatura}
 \label{tab:related}
@@ -48,7 +51,7 @@ La revisión inicial comprende 26 documentos del corpus local del proyecto. Se i
 Eje & Trabajos representativos & Relación con la propuesta\\\hline
 Arquitectura y diseño & Dimensiones de MAS, metamodelos, catálogos y SALLMA \cite{li,miranda,lu,liu,sallma} & Roles, restricciones, conocimiento y evolución.\\
 Deriva y verificación & Trazas de firmware, contratos, AgentSpec, MCP, MENTOR, TraceFix y Pro2Guard \cite{deangelis,contracts,agentspec,mcp,mentor,tracefix,pro2guard} & Especificación esperada y chequeo de operaciones.\\
-Observabilidad y traza & AgentOps, AgentTelemetry, instrumentación MAS, Watson, COMPASS y Pathfinder \cite{agentops,telemetry,faults,watson,compass,pathfinder} & Registro de evidencia y diagnóstico de discrepancias.\\
+Observabilidad y traza & AgentOps, AgentTelemetry, instrumentación MAS, Watson, COMPASS, Pathfinder, análisis de trayectorias y trazabilidad de roles \cite{agentops,telemetry,faults,watson,compass,pathfinder,survey,barrak} & Registro de evidencia y diagnóstico de discrepancias.\\
 Prompts y memoria & Evolución de prompts, ClawVM, GovMem y MemArchitect \cite{prompts,claw,govmem,memarch} & Integridad de cláusulas, admisión, sobrescritura y expiración.\\
 Confianza y procedencia & TARV y TraceCaps \cite{tarv,tracecaps} & Auditoría y análisis complementario.\\\hline
 \end{tabular}
@@ -93,15 +96,6 @@ Sea \(\tau=(s_1,\ldots,s_n)\) la secuencia de tramos observados de una sesión. 
 \label{fig:taxonomy}
 \end{figure}
 
-\subsection{Cláusulas de prompt}
-Para un rol \(i\), sean \(R_i\) los identificadores obligatorios, \(A_i(s)\) los identificadores activos y \(h_i^0(c)\) el resumen SHA-256 canónico de la cláusula \(c\). El tramo declara \(h_s(c)\) para las cláusulas activas. \(P_1\) señala la ausencia de un elemento de \(R_i\). \(P_2\) señala la presencia conjunta de un par registrado en el conjunto de conflictos \(C\). \(P_3\) señala una discrepancia de resumen para un identificador con valor canónico. El resultado depende de que el instrumentador registre identificadores y resúmenes fieles a las cláusulas utilizadas.
-
-\subsection{Estado de memoria}
-El verificador mantiene un mapa de claves a valores, marcas temporales y períodos de vigencia (TTL). En una escritura, \(M_1\) comprueba la marca de verificación y \(M_2\) contrasta el nuevo valor con el valor registrado y la autorización de reemplazo. En una lectura de una clave conocida, \(M_3\) compara su antigüedad con el TTL. La marca de verificación es evidencia declarada por la aplicación. Su calidad depende del mecanismo que la produce \cite{govmem}.
-
-\subsection{Políticas de herramientas}
-Sea \(K_i\) el conjunto de herramientas permitidas para el rol \(i\), \(V_a\) el validador de argumentos para la herramienta \(a\), y \(D\) el conjunto de precedencias \((a,b)\). \(\Pi_1\) comprueba la pertenencia a \(K_i\) y \(\Pi_2\) exige que el validador aplicable acepte los argumentos. \(\Pi_3\) comprueba que la traza haya registrado \(a\) antes de \(b\). La implementación evaluada conserva un conjunto de nombres observados durante la sesión. La comprobación de éxito y la correlación por recurso requerirían atributos adicionales.
-
 \begin{table*}[!t]
 \caption{Reglas de violación y distribución del corpus guionizado}
 \label{tab:operators}
@@ -122,7 +116,17 @@ Regla & IDs & Condición de violación & Patrón evaluado & Casos\\\hline
 \end{tabular}
 \end{table*}
 
-\FloatBarrier
+\subsection{Cláusulas de prompt}
+Para un rol \(i\), sean \(R_i\) los identificadores obligatorios, \(A_i(s)\) los identificadores activos y \(h_i^0(c)\) el resumen SHA-256 canónico de la cláusula \(c\). El tramo declara \(h_s(c)\) para las cláusulas activas. \(P_1\) señala la ausencia de un elemento de \(R_i\). \(P_2\) señala la presencia conjunta de un par registrado en el conjunto de conflictos \(C\). \(P_3\) señala una discrepancia de resumen para un identificador con valor canónico. El resultado depende de que el instrumentador registre identificadores y resúmenes fieles a las cláusulas utilizadas.
+
+\subsection{Estado de memoria}
+El verificador mantiene un mapa de claves a valores, marcas temporales y períodos de vigencia (TTL). En una escritura, \(M_1\) comprueba la marca de verificación y \(M_2\) contrasta el nuevo valor con el valor registrado y la autorización de reemplazo. En una lectura de una clave conocida, \(M_3\) compara su antigüedad con el TTL. La marca de verificación es evidencia declarada por la aplicación. Su calidad depende del mecanismo que la produce \cite{govmem}.
+
+\subsection{Políticas de herramientas}
+Sea \(K_i\) el conjunto de herramientas permitidas para el rol \(i\), \(V_a\) el validador de argumentos para la herramienta \(a\), y \(D\) el conjunto de precedencias \((a,b)\). \(\Pi_1\) comprueba la pertenencia a \(K_i\) y \(\Pi_2\) exige que el validador aplicable acepte los argumentos. \(\Pi_3\) comprueba que la traza haya registrado \(a\) antes de \(b\). La implementación evaluada conserva un conjunto de nombres observados durante la sesión. La comprobación de éxito y la correlación por recurso requerirían atributos adicionales.
+
+
+
 \section{Instrumentación y chequeo}
 El esquema de dominio usa nombres bajo \texttt{agentarch.*}. El tramo \texttt{session} representa la sesión. Los tramos \texttt{agent\_turn}, \texttt{memory\_op} y \texttt{tool\_call} contienen respectivamente las cláusulas activas y sus resúmenes, los datos de acceso a memoria y la herramienta con sus argumentos serializados.
 
@@ -130,7 +134,7 @@ En el chequeo incremental, el procesador clasifica el tramo, evalúa las reglas 
 
 Las convenciones semánticas GenAI de OpenTelemetry describen señales y atributos de inferencia, agentes y herramientas \cite{genaisemconv}. El artefacto reutiliza \texttt{gen\_ai.request.model} y añade atributos locales bajo \texttt{agentarch.*} para cláusulas, memoria y veredictos. Este espacio es una extensión de dominio. La integración con el SDK permite relacionar tramos, mientras la conformidad completa con las convenciones GenAI exige mapear y verificar los atributos de cada operación.
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
 \centering
 \boxstep{\texttt{onEnd(tramo)}}
 \downstep
@@ -143,7 +147,6 @@ Las convenciones semánticas GenAI de OpenTelemetry describen señales y atribut
 \label{fig:processor}
 \end{figure}
 
-\FloatBarrier
 \section{Evaluación experimental}
 \subsection{Escenarios y comparadores}
 El dominio sintético representa una aplicación de atención de pedidos. OrderTriage clasifica solicitudes, InventoryAgent consulta o reserva existencias y BillingAgent ejecuta operaciones financieras. La Fig.~\ref{fig:example} muestra el flujo con interacción de la ampliación experimental.
@@ -182,18 +185,30 @@ La Tabla~\ref{tab:latency_bench} informa media, DE, mínimo, mediana, p95 y p99 
 
 Se conservó también la medición original. En sus turnos, la media fue 0,189, la mediana 0,112 y el p99 0,986 \(\mu\mathrm{s}\) por llamada, calculados sobre 50 medias de lote. Esta separación justifica acompañar la media con percentiles. Las mediciones del núcleo incluyen comprobación y, en el camino correspondiente, creación y encolado de alertas. La exportación y el consumo permanecen fuera del intervalo.
 
+Entre las dos mediciones, las medias conformes de turno, escritura y herramienta pasaron de 0,189/0,079/0,582 a 0,086/0,020/0,439 \(\mu\mathrm{s}\), respectivamente: razones aproximadas de 2,2, 4,0 y 1,3. Ambas implementaciones ya calentaban cada lote. La ampliación duplica el número de lotes, rota los seis caminos e introduce entradas y drenajes distintos; el estado de optimización del motor puede variar entre procesos. Sin un experimento emparejado que aísle esos factores, no puede atribuirse la diferencia al calentamiento ni afirmarse una aceleración del verificador. Los valores caracterizan entradas concretas y órdenes de decenas a centenas de nanosegundos para el núcleo conforme. En cien observaciones, p99 interpola las dos mayores medias y es una estimación frágil de la cola.
+
+La Tabla~\ref{tab:supplement_time} añade lecturas vigentes y expiradas, que ejercitan \(M_3\), y llamadas al adaptador \path{AgentArchOtelProcessor}. Se conserva el diseño de cien lotes de mil llamadas, con calentamiento y verificación del conteo de alertas. El adaptador recibe una entrada con la forma de \texttt{ReadableSpan}; incluye conversión, búsqueda de sesión, medición interna, drenaje y callback de auditoría. Esta medición excluye crear tramos con el SDK y exportarlos. El drenaje se realiza dentro del camino del adaptador y fuera del intervalo del núcleo, por lo que sus alcances temporales son distintos. Ninguno representa costo extremo a extremo.
+\input{../paper_assets/tabla_tiempos_complementarios.tex}
+
 \subsection{Piloto inicial por rol}
 El piloto anterior ejecutó Qwen3-0.6B en GGUF Q8\_0 \cite{qwen}, servido por llama.cpp b12704 \cite{llamacpp}. Ocho solicitudes se repitieron tres veces a temperatura cero. Las 24 sesiones resultaron válidas y reprodujeron ocho planes distintos. Se observaron 12 sesiones con infracciones y 12 conformes; \arch{} detectó y localizó las 12 anómalas y \(B_2\), seis. En ese piloto, la diferencia de cobertura sobre \(B_2\) se debió a \(\Pi_3\). Cada sesión utilizó un único rol, de modo que ese antecedente verifica integración por rol y consistencia de las políticas de herramientas.
 
 \subsection{Ampliación con interacción entre tres roles}
-El protocolo se fijó antes de la ejecución. Doce solicitudes del dominio se muestrearon cinco veces con temperatura 0,7 y semillas 100--104. Seis peticiones son nominales y seis buscan transgredir las reglas o incluyen un fallo experimental de prompt. W10 omite la cláusula de autenticación de OrderTriage y W11 altera el texto de garantía de BillingAgent. Los resúmenes se calculan sobre las cláusulas realmente enviadas. Los demás planes, mensajes y operaciones de memoria proceden de la salida del modelo.
+\subsubsection{Protocolo}
+El protocolo se fijó antes de la ejecución. Doce solicitudes del dominio se muestrearon cinco veces con temperatura 0,7 y semillas 100--104. Seis son peticiones benignas y seis buscan transgredir las reglas o incluyen un fallo experimental de prompt. Una petición benigna describe la intención de entrada y no garantiza una traza conforme. W10 omite la cláusula de autenticación de OrderTriage y W11 altera el texto de garantía de BillingAgent. Los resúmenes se calculan sobre las cláusulas realmente enviadas. Los demás planes, mensajes y operaciones de memoria proceden de la salida del modelo.
 
 La orquestación fija ejecuta OrderTriage, InventoryAgent y BillingAgent en una sesión. El siguiente rol recibe el mensaje generado por el anterior, los resultados de herramientas y el estado de memoria compartida. El modelo produce un plan JSON por rol, bajo un esquema de formato. Los servicios locales registran efectos sobre pedidos, inventario y pagos y rechazan intentos inválidos con HTTP 400. Las escrituras de memoria conservan el valor propuesto y una marca de soporte calculada por la aplicación a partir de evidencia disponible. La autorización de reemplazo procede del caso.
 
-El anotador \path{label_workflow.js} evalúa las acciones observadas sin consultar las alertas. Codifica las mismas políticas que el monitor mediante implementación separada, por lo que su concordancia mide consistencia de implementación. Adicionalmente se comprueban efectos efectivos del servicio frente al pedido, con criterios fijados antes de ejecutar. Para inventario se exige el producto y la cantidad total solicitados, o una consulta sin reserva cuando corresponde. Para finanzas se comprueba el pago único por el monto aprobado, una cotización cero sin pago o ausencia de operaciones financieras según el caso. También se verifica la dirección final. La finalización requiere cumplir esas condiciones. Este segundo criterio sigue siendo automático y específico del dominio.
+\subsubsection{Anotador}
+El anotador \path{label_workflow.js} evalúa las acciones observadas sin consultar las alertas. Codifica las mismas políticas que el monitor mediante implementación separada, por lo que su concordancia mide consistencia de implementación.
+
+\subsubsection{Criterios de negocio}
+Se comprueban los efectos efectivos del servicio frente al pedido, con criterios fijados antes de ejecutar. Para inventario se exige el producto y la cantidad total solicitados, o una consulta sin reserva cuando corresponde. Para finanzas se comprueba el pago único por el monto aprobado, una cotización cero sin pago o ausencia de operaciones financieras según el caso. También se verifica la dirección final. La finalización requiere cumplir esas condiciones. Este segundo criterio sigue siendo automático y específico del dominio.
+
+\subsubsection{Resultados}
 
 \input{../paper_assets/tabla_vi_multiagente.tex}
-Se completaron \WorkflowValid{} sesiones válidas de \WorkflowAttempted{} intentos, con \WorkflowErrors{} errores, \WorkflowRequests{} peticiones al modelo y \WorkflowSpans{} tramos del SDK. Hubo \WorkflowDistinct{} planes distintos, calculados sobre herramientas y operaciones de memoria por rol, excluyendo variaciones exclusivamente verbales del mensaje. Las peticiones nominales pueden producir infracciones y las adversariales pueden ser rechazadas. Las etiquetas de referencia se asignan según las acciones obtenidas.
+Se completaron \WorkflowValid{} sesiones válidas de \WorkflowAttempted{} intentos, con \WorkflowErrors{} errores, \WorkflowRequests{} peticiones al modelo y \WorkflowSpans{} tramos del SDK. Hubo \WorkflowDistinct{} planes distintos, calculados sobre herramientas y operaciones de memoria por rol, excluyendo variaciones exclusivamente verbales del mensaje. De las 30 sesiones de peticiones benignas, 27 produjeron infracciones. Las etiquetas de referencia se asignan según las acciones obtenidas.
 
 Se observaron \WorkflowDrift{} sesiones con infracciones y \WorkflowConformant{} conformes. \arch{} detectó \WorkflowDetected{} de las primeras y emitió \WorkflowFalsePositive{} alertas sobre las conformes. El primer paso coincidió en \WorkflowFirstCorrect{} sesiones anómalas. \(B_2\) detectó \WorkflowBTwoDetected{}. La Tabla~\ref{tab:multi_results} muestra la matriz de confusión. En la Tabla~\ref{tab:multi_operators}, Ref. cuenta pares de operador y paso etiquetados, Coinc. los detectados y Extra los alertados sin etiqueta correspondiente. El conteo por operador puede solaparse dentro de una sesión. No se observaron \(P_2\) ni \(M_3\) en esta ampliación; su evidencia procede del corpus guionizado. Las diez sesiones W10/W11 contienen perturbaciones de prompt introducidas por el experimento. Otras \WorkflowModelDrift{} sesiones presentaron infracciones sin esas perturbaciones.
 
@@ -202,6 +217,20 @@ Se observaron \WorkflowDrift{} sesiones con infracciones y \WorkflowConformant{}
 La Tabla~\ref{tab:multi_cases} agrupa las ejecuciones por solicitud y permite examinar la diversidad real. Las 60 sesiones previstas constituyen doce grupos de cinco muestras, sujetos a las mismas instrucciones y contexto de tarea. La temperatura positiva permite variación y su magnitud se informa a partir de los planes observados.
 
 El criterio de negocio registró \WorkflowTaskComplete{} tareas completas. En \WorkflowConformantIncomplete{} sesiones la traza fue conforme y el pedido quedó incompleto. El resultado de cero tareas completas limita la representatividad de este modelo pequeño en la configuración de un plan por rol, sin ciclo de reparación. Los operadores actuales expresan obligaciones sobre acciones observadas; la omisión de una acción necesaria puede dejar una tarea pendiente sin activar esas condiciones de violación. Este resultado delimita la interpretación de una sesión sin alertas. Las fichas de eventos se entregan para revisión humana; los resultados publicados aquí provienen de los criterios automáticos descritos.
+
+\subsection{Control positivo y sensibilidad a M1}
+Doce planes escritos a mano, uno por solicitud, atravesaron el mismo ejecutor, servicios, memoria, captura del SDK y criterio de finalización. Los doce completaron la tarea. Diez fueron conformes; W10/W11 conservaron sus perturbaciones y activaron respectivamente \(P_1\) y \(P_3\). Estos controles comprueban que existen trayectorias aceptadas por el arnés y el criterio, sin demostrar que toda su implementación carezca de errores. Se mantienen separados de la evidencia generada por modelos.
+
+M1 aporta 84 de los 141 pares de operador y paso (59,6\%), en 46 sesiones. Su evidencia depende de la marca calculada por la aplicación. La Tabla~\ref{tab:exclusions} recalcula presencia y primer paso al excluir M1, W10/W11 o ambos. Sin ambas fuentes quedan 28 sesiones con infracciones y 38 pares coincidentes. Todas las filas tienen cero FP, FN y pares extra respecto del criterio filtrado. Las 22 sesiones conformes al retirar M1 lo son respecto de un conjunto de reglas más débil; no amplían la evidencia de falsos positivos del monitor completo.
+\input{../paper_assets/tabla_exclusiones.tex}
+
+Las acciones del modelo ejercitan \(M_1,M_2,\Pi_1,\Pi_2,\Pi_3\). Los casos \(P_1/P_3\) son inyectados y \(P_2/M_3\) carecen de observaciones con modelo. No se ha realizado revisión humana. Se entrega una muestra reproducible de diez sesiones con contexto y campos de revisión vacíos: los tres conformes y siete casos con infracciones. La revisión de una persona identificada sigue pendiente y no se reemplaza por la inspección asistida por IA.
+
+\subsection{Contraste exploratorio con un modelo mayor}
+Se ejecutó Qwen3-1.7B-GGUF Q8\_0 \cite{qwenlarger} sobre las doce solicitudes, una muestra por solicitud, temperatura 0,7 y semilla 100. Se conservaron los prompts, roles, servicios, cuantización, servidor y límites de contexto y salida. El protocolo fijó esta configuración antes de ejecutar y conserva todas las respuestas. El SHA-256 de los pesos se comprobó frente al repositorio oficial.
+
+La Tabla~\ref{tab:controls_models} compara esas sesiones con la primera muestra de las mismas doce solicitudes de Qwen3-0.6B y con los controles. Qwen3-1.7B produjo \LargerValid{} sesiones válidas, \LargerConformant{} conformes y \LargerComplete{} tareas completas. El monitor coincidió en \LargerDetected{} de las \LargerDrift{} sesiones con infracciones. El contraste es descriptivo: una muestra por solicitud no permite atribuir diferencias de rendimiento al tamaño del modelo ni estimar su variabilidad. Aumentar parámetros no garantiza completar las tareas con este esquema de un plan por rol. La cuantización y el contexto compartidos permiten documentar el contraste sin presentar los doce ensayos como una validación externa amplia.
+\input{../paper_assets/tabla_control_modelos.tex}
 
 \subsection{Sensibilidad a metadatos incorrectos}
 Una prueba separada de inyección de fallos examinó dos supuestos. Al alterar una cláusula y registrar su nuevo resumen, el verificador emitió \(P_3\). Al mantener indebidamente el resumen canónico en los metadatos, omitió la alteración. Una escritura sin respaldo produjo \(M_1\) con \texttt{verified=false} y quedó sin alerta cuando se informó incorrectamente \texttt{true}. Los cuatro casos documentan la frontera de confianza del instrumentador. Esta prueba usa entradas controladas y sus resultados se conservan aparte de las sesiones del modelo. La Tabla~\ref{tab:metadata_quality} resume los cuatro casos. El comando \texttt{node} \path{experiments/instrumentation_sensitivity.js} regenera tanto el JSON como la tabla.
@@ -218,21 +247,23 @@ p_U=1-0.05^{1/10}\approx 0.259.
 \]
 La aproximación de la regla del tres da 30\%. Ese supuesto de independencia se debilita por la repetición del patrón nominal. El límite se presenta para mostrar la incertidumbre del tamaño muestral y no permite estimar la tasa poblacional del sistema. En el piloto inicial, cero de doce corresponde a cuatro solicitudes repetidas. La ampliación agrupa cinco muestras por solicitud. Sus conteos se presentan por sesión y por solicitud y no se interpretan como muestreo independiente de una población de tareas.
 
-\textit{Medición temporal.} Se midieron entradas concretas con calentamiento, bajo una versión del motor JavaScript y un equipo. Los percentiles describen medias por lote. La cola se consume fuera del intervalo y los tiempos no incluyen el costo completo de captura, exportación, consumo e inferencia en una aplicación desplegada.
+En la ampliación, cero FP en solo tres sesiones conformes daría \(1-0.05^{1/3}\approx0.632\) bajo el mismo supuesto binomial. Los casos son W02-R1, W02-R4 y W06-R3: únicamente dos solicitudes aportan negativos. La dependencia entre muestras debilita también esta cota ilustrativa. No se agrupan con los diez nominales guionizados, con el piloto ni con los controles escritos a mano, porque proceden de poblaciones y mecanismos diferentes. Se necesita un conjunto adicional de trayectorias conformes generado sin selección por el veredicto del monitor.
 
-\textit{Validez externa.} La ampliación incorpora tres roles que intercambian mensajes y memoria, con una orquestación fija y un modelo de 0,6 mil millones de parámetros. Los servicios son locales y las solicitudes proceden de un dominio curado. Estas condiciones restringen la generalización a otros modelos, tareas, coordinaciones y servicios. La precedencia conserva nombres de herramientas observados y requiere ampliar la correlación de éxito y recurso.
+\textit{Medición temporal.} Se midieron entradas concretas con calentamiento, bajo una versión del motor JavaScript y un equipo. Los percentiles describen medias por lote. La cola se consume fuera del intervalo del núcleo, pero dentro del adaptador. Los tiempos excluyen creación de tramos del SDK, exportación e inferencia. Las diferencias entre ejecuciones históricas no constituyen una comparación emparejada ni demuestran una mejora del rendimiento.
+
+\textit{Validez externa.} La ampliación incorpora tres roles que intercambian mensajes y memoria, con una orquestación fija y un modelo de 0,6 mil millones de parámetros. El contraste con 1,7 mil millones aporta una sola muestra por solicitud. Los servicios son locales y las solicitudes proceden de un dominio curado. Estas condiciones restringen la generalización a otros modelos, tareas, coordinaciones y servicios. La precedencia conserva nombres de herramientas observados y requiere ampliar la correlación de éxito y recurso. Los controles positivos validan trayectorias posibles del arnés, sin demostrar que la interfaz sea adecuada para todos los modelos.
 
 \section{Disponibilidad y reproducción}
-El artefacto es público en \url{https://github.com/leonardobaca7/agentarch}. La etiqueta \texttt{v0.3.0-c2-second-review} fija esta revisión y conserva los datos anteriores. \texttt{bd1c1a1} identifica el microbenchmark inicial, \texttt{647f45f} el primer piloto y \texttt{cd6dc65} el ejecutor y protocolo de la ampliación.
+El artefacto es público en \url{https://github.com/leonardobaca7/agentarch}. La etiqueta \texttt{v0.4.0-consolidated-review} fija esta revisión y conserva las anteriores. \texttt{bd1c1a1} identifica el microbenchmark inicial, \texttt{647f45f} el primer piloto y \texttt{cd6dc65} el ejecutor de las 60 sesiones y \path{benchmark_paths.js}. \texttt{f93051a} fija \path{analyze_multiagent.js}; \texttt{9261a10}, el control y la configuración del modelo mayor; y \texttt{9ca896f}, las exclusiones y el benchmark complementario. GitHub identificó la licencia como MIT al verificar su API el 25 de noviembre de 2026.
 
-Con \texttt{npm ci} se instalan las dependencias fijadas. Los protocolos de \path{docs/} especifican los pesos, su SHA-256 y el servidor. El comando \texttt{node} \path{experiments/run_multiagent_evaluation.js} ejecuta las solicitudes en un directorio nuevo. \texttt{node} \path{experiments/analyze_multiagent.js} contrasta respuestas, mensajes transferidos, memoria, tramos, etiquetas y efectos y genera las tablas. \texttt{node} \path{experiments/benchmark_paths.js} mide los seis caminos y conserva las muestras. Los datos crudos incluyen errores, parámetros y versiones para inspección independiente.
+Con \texttt{npm ci} se instalan las dependencias fijadas. Los protocolos de \path{docs/} especifican los pesos, su SHA-256 y el servidor. El comando \texttt{node} \path{experiments/run_multiagent_evaluation.js} ejecuta las solicitudes en un directorio nuevo. \texttt{node} \path{experiments/analyze_multiagent.js} contrasta respuestas, mensajes transferidos, memoria, tramos, etiquetas y efectos. Los scripts \path{analyze_exclusions.js} y \path{analyze_consolidated.js}, bajo \path{experiments/}, producen las exclusiones y el contraste de controles y modelos. \path{benchmark_paths.js} y \path{benchmark_supplement.js} miden los caminos temporales y conservan las muestras. Los datos crudos incluyen errores, parámetros y versiones para inspección independiente. El protocolo consolidado distingue planes escritos a mano, inferencia real y revisión humana pendiente.
 
 \section{Trabajo futuro}
 La ampliación requiere contrastarse con modelos más capaces, solicitudes de otros dominios, revisión humana de etiquetas e interacción con destinatarios elegidos dinámicamente. Las condiciones de finalización de tarea permitirían detectar omisiones que las reglas actuales no observan. Se estudiará la correlación de precedencia por pedido, producto y éxito, así como el costo operativo mediante ejecuciones emparejadas con y sin monitor. La integridad de los metadatos sigue siendo un requisito de la instrumentación.
 
 \section{Conclusiones}
-\arch{} concreta nueve operadores de conformidad sobre prompts, memoria y herramientas. El corpus guionizado documenta cobertura de las 40 derivas preparadas. El primer piloto aporta evidencia por rol y la ampliación evalúa mensajes y memoria compartida entre tres roles, con \WorkflowValid{} sesiones válidas de doce solicitudes a temperatura 0,7. El monitor detectó \WorkflowDetected{} de las \WorkflowDrift{} sesiones etiquetadas con infracciones. El anotador comparte las políticas del verificador, de modo que ese resultado expresa concordancia de implementación. El criterio de efectos del pedido encontró \WorkflowTaskComplete{} tareas completas y \WorkflowConformantIncomplete{} trazas conformes con tareas incompletas. La prueba de metadatos y los percentiles de los caminos temporales delimitan condiciones de confianza y costo del núcleo. Estas evidencias precisan el alcance de las reglas y las comprobaciones adicionales que requiere una aplicación.
+AgentArch concreta nueve operadores de conformidad sobre prompts, memoria y herramientas. El corpus guionizado documenta cobertura de 40 infracciones preparadas. La ampliación con Qwen3-0.6B detecta 57 sesiones con infracciones y conserva coincidencia en 28 al retirar M1 y los prompts perturbados. Ese resultado expresa consistencia con un anotador que comparte las políticas. Las 60 sesiones no completan el pedido, mientras los doce controles escritos a mano sí lo completan con el mismo ejecutor. El contraste con Qwen3-1.7B obtiene \LargerComplete{} tareas completas de doce intentos. Los tres negativos del estudio principal y la ausencia de revisión humana impiden afirmar una tasa general de falsos positivos o validez independiente. Las mediciones de lectura, alerta y adaptador, junto con las omisiones por metadatos incorrectos, precisan los alcances de costo y confianza. Las evidencias respaldan un prototipo de chequeo de reglas y delimitan las comprobaciones adicionales necesarias para una aplicación.
 
-\IEEEtriggeratref{17}
+\IEEEtriggeratref{31}
 \input{referencias.tex}
 \end{document}

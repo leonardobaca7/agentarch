@@ -1,0 +1,62 @@
+[
+  {
+    "excludeInjected": false,
+    "excludeM1": false,
+    "sessions": 60,
+    "drift": 57,
+    "conformant": 3,
+    "TP": 57,
+    "FP": 0,
+    "TN": 3,
+    "FN": 0,
+    "firstCorrect": 57,
+    "referencePairs": 141,
+    "detectedPairs": 141,
+    "extraPairs": 0
+  },
+  {
+    "excludeInjected": false,
+    "excludeM1": true,
+    "sessions": 60,
+    "drift": 38,
+    "conformant": 22,
+    "TP": 38,
+    "FP": 0,
+    "TN": 22,
+    "FN": 0,
+    "firstCorrect": 38,
+    "referencePairs": 57,
+    "detectedPairs": 57,
+    "extraPairs": 0
+  },
+  {
+    "excludeInjected": true,
+    "excludeM1": false,
+    "sessions": 50,
+    "drift": 47,
+    "conformant": 3,
+    "TP": 47,
+    "FP": 0,
+    "TN": 3,
+    "FN": 0,
+    "firstCorrect": 47,
+    "referencePairs": 112,
+    "detectedPairs": 112,
+    "extraPairs": 0
+  },
+  {
+    "excludeInjected": true,
+    "excludeM1": true,
+    "sessions": 50,
+    "drift": 28,
+    "conformant": 22,
+    "TP": 28,
+    "FP": 0,
+    "TN": 22,
+    "FN": 0,
+    "firstCorrect": 28,
+    "referencePairs": 38,
+    "detectedPairs": 38,
+    "extraPairs": 0
+  }
+]
