@@ -59,12 +59,13 @@ function main() {
         assert.ok(root);
         const plans = [];
         for (const [index, request] of raw.entries()) {
-            assert.equal(request.httpStatus, 200);
+            const control = metadata.planSource === 'authored_positive_control';
+            assert.equal(request.httpStatus, control ? null : 200);
             assert.equal(request.payload.temperature, metadata.temperature);
             assert.equal(request.traceId, record.traceId);
-            const response = JSON.parse(request.raw);
-            assert.equal(response.choices[0].finish_reason, 'stop');
-            const plan = JSON.parse(response.choices[0].message.content);
+            const response = control ? null : JSON.parse(request.raw);
+            if (!control) assert.equal(response.choices[0].finish_reason, 'stop');
+            const plan = control ? request.plan : JSON.parse(response.choices[0].message.content);
             const user = JSON.parse(request.payload.messages[1].content);
             assert.deepEqual(user.prior_agent_messages, record.stages.slice(0, index), 'Actual handoff must reach the next prompt');
             assert.equal(request.role, metadata.roles[index]);
@@ -130,7 +131,7 @@ function main() {
     });
     const analysis = {
         attempted: summary.attempted, valid: records.length, errors: summary.errors,
-        modelRequests: requests.length, sdkSpans: spans.length,
+        modelRequests: metadata.planSource === 'authored_positive_control' ? 0 : requests.length, sdkSpans: spans.length,
         observedConformant: summary.observedConformant, observedDrift: summary.observedDrift,
         distinctPlans: new Set(fingerprints.values()).size, byCase, byOperator: expectedOperators,
         taskCompleted: summary.taskCompleted,
@@ -159,7 +160,9 @@ function main() {
         WorkflowModelDrift: analysis.modelGeneratedDrift,
         WorkflowBTwoDetected: analysis.metrics.B2.TP
     };
-    fs.writeFileSync('paper_assets/metricas_ampliacion.tex', Object.entries(values)
+    const assetDir = process.env.WORKFLOW_ASSET_DIR || 'paper_assets';
+    fs.mkdirSync(assetDir, { recursive: true });
+    fs.writeFileSync(path.join(assetDir, 'metricas_ampliacion.tex'), Object.entries(values)
         .map(([key, value]) => '\\newcommand{\\' + key + '}{' + value + '}').join('\n') + '\n');
     const row = cells => cells.join(' & ') + String.raw`\\`;
     const table = (caption, label, alignment, header, rows, wide = false) => [
@@ -172,15 +175,15 @@ function main() {
     const names = { B1: '$B_1$', B2: '$B_2$', AgentArch: String.raw`\arch` };
     const confusion = Object.entries(summary.metrics).map(([key, m]) => [names[key], m.TP, m.FP, m.TN, m.FN,
         m.firstStepAccuracy === null ? '--' : (100 * m.firstStepAccuracy).toFixed(1)]);
-    fs.writeFileSync('paper_assets/tabla_vi_multiagente.tex', table('Detección en las sesiones multiagente válidas', 'tab:multi_results', 'lrrrrr',
+    fs.writeFileSync(path.join(assetDir, 'tabla_vi_multiagente.tex'), table('Detección en las sesiones multiagente válidas', 'tab:multi_results', 'lrrrrr',
         ['Variante', 'VP', 'FP', 'VN', 'FN', String.raw`$t^*$ (\%)`], confusion));
     const opName = op => op.startsWith('Pi') ? '$\\Pi_' + op.slice(2) + '$' : '$' + op[0] + '_' + op.slice(1) + '$';
-    fs.writeFileSync('paper_assets/tabla_vii_operadores.tex', table('Operadores observados en el estudio multiagente', 'tab:multi_operators', 'lrrrr',
+    fs.writeFileSync(path.join(assetDir, 'tabla_vii_operadores.tex'), table('Operadores observados en el estudio multiagente', 'tab:multi_operators', 'lrrrr',
         ['Operador', 'Ses.', 'Ref.', 'Coinc.', 'Extra'], Object.entries(expectedOperators)
             .map(([op, m]) => [opName(op), m.sessions, m.events, m.matchedEvents, m.unexpectedEvents])));
-    fs.writeFileSync('paper_assets/tabla_viii_solicitudes.tex', table('Resultados agrupados por solicitud', 'tab:multi_cases', 'llrrrr',
+    fs.writeFileSync(path.join(assetDir, 'tabla_viii_solicitudes.tex'), table('Resultados agrupados por solicitud', 'tab:multi_cases', 'llrrrr',
         ['ID', 'Tipo', 'Válidas', 'Con deriva', 'Planes distintos', 'Tareas completas'], byCase.map(c => [c.caseId,
-            c.kind === 'nominal' ? 'Nominal' : c.kind === 'prompt_fault' ? 'Prompt perturbado' : 'Adversarial',
+            c.kind === 'nominal' ? 'Petición benigna' : c.kind === 'prompt_fault' ? 'Prompt perturbado' : 'Adversarial',
             c.valid, c.observedDrift, c.distinctPlans, c.taskCompleted]), true));
     const review = ['session_id,step,type,role,observed_action,reviewer_operator,reviewer_comment'];
     for (const record of records) {

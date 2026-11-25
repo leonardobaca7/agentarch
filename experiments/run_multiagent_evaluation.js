@@ -14,6 +14,7 @@ const { summarize } = require('./run_live_evaluation');
 const { promptClauses, executeTool, taskOutcome } = require('./workflow_domain');
 const { labelWorkflow } = require('./label_workflow');
 const availableCases = require('./workflow_cases.json');
+const { positivePlan } = require('./positive_control');
 
 const planSchema = {
     type: 'object', additionalProperties: false,
@@ -32,7 +33,11 @@ async function main() {
     const repeats = Number(process.env.WORKFLOW_REPEATS || 5);
     const temperature = Number(process.env.WORKFLOW_TEMPERATURE || 0.7);
     const endpoint = process.env.LLM_ENDPOINT || 'http://127.0.0.1:18080/v1';
-    const model = 'Qwen3-0.6B-Q8_0';
+    const control = process.env.WORKFLOW_CONTROL === 'positive';
+    const model = control ? 'handwritten-positive-control' : (process.env.WORKFLOW_MODEL || 'Qwen3-0.6B-Q8_0');
+    const modelSha256 = control ? null : (process.env.WORKFLOW_MODEL_SHA256 ||
+        (model === 'Qwen3-0.6B-Q8_0' ? '9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031' : null));
+    if (!control && !/^[a-f0-9]{64}$/.test(modelSha256 || '')) throw new Error('Declare the verified model SHA-256');
     const caseIds = process.env.WORKFLOW_CASE_IDS?.split(',');
     const cases = caseIds ? availableCases.filter(test => caseIds.includes(test.id)) : availableCases;
     if (!cases.length || (caseIds && cases.length !== caseIds.length)) throw new Error('Unknown or repeated case IDs');
@@ -58,12 +63,13 @@ async function main() {
     trace.setGlobalTracerProvider(provider);
     const tracer = trace.getTracer('agentarch-multiagent-study', '1.0.0');
     const roles = ['OrderTriage', 'InventoryAgent', 'BillingAgent'];
-    const metadata = { started: new Date().toISOString(), endpoint, model, repeats, temperature,
+    const metadata = { started: new Date().toISOString(), endpoint: control ? null : endpoint, model, repeats, temperature,
+        planSource: control ? 'authored_positive_control' : 'model',
         seeds: Array.from({ length: repeats }, (_, i) => 100 + i), roles, cases, planSchema,
         maxTokens: 512, contextSize: 8192, threads: 4, gpuLayers: 0, node: process.version,
         cpu: os.cpus()[0].model, platform: os.platform(), ramBytes: os.totalmem(),
         runtime: 'llama.cpp b12704 / 72cda4a22',
-        modelSha256: '9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031',
+        modelSha256,
         commit: execFileSync('git', ['-c', 'safe.directory=' + process.cwd().replaceAll('\\', '/'), 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim() };
     fs.writeFileSync(path.join(output, 'metadata.json'), JSON.stringify(metadata, null, 2));
     const records = [];
@@ -90,7 +96,7 @@ async function main() {
                     function writeMemory(key, value, authorized = false, initial = false) {
                         const timestamp = Date.now();
                         const evidence = initial ? { shipping_address: 'Av. Principal 100' } : { ...state.evidence };
-                        record({ type: 'write', key, value, authorized, timestamp, ttl: 600000, evidence, origin: initial ? 'initialization' : 'model' },
+                        record({ type: 'write', key, value, authorized, timestamp, ttl: 600000, evidence, origin: initial ? 'initialization' : control ? 'authored_control' : 'model' },
                             'agentarch.memory_op', {
                                 'agentarch.memory.op': 'write', 'agentarch.memory.key': key,
                                 'agentarch.memory.new_value': value, 'agentarch.memory.timestamp': timestamp,
@@ -135,6 +141,11 @@ async function main() {
                             } });
                             let plan;
                             try {
+                                if (control) {
+                                    plan = positivePlan(role, test);
+                                    append('requests.jsonl', { id, role, traceId, payload,
+                                        planSource: 'authored_positive_control', httpStatus: null, raw: null, plan });
+                                } else {
                                 const res = await fetch(endpoint + '/chat/completions', { method: 'POST',
                                     headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
                                     signal: AbortSignal.timeout(180000) });
@@ -144,6 +155,7 @@ async function main() {
                                 const response = JSON.parse(raw);
                                 if (response.choices[0].finish_reason !== 'stop') throw new Error('Truncated model output');
                                 plan = JSON.parse(response.choices[0].message.content);
+                                }
                                 if (!Array.isArray(plan.calls) || !Array.isArray(plan.writes) || !Array.isArray(plan.reads) || typeof plan.handoff !== 'string') throw new Error('Malformed model plan');
                                 events.push({ type: 'turn', role, step: turnStep, clauses: active, fault: test.fault || null });
                             } catch (error) {
