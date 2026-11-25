@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const { labelWorkflow } = require('./label_workflow');
 const { summarize } = require('./run_live_evaluation');
 const cases = require('./workflow_cases.json');
+const { queryCases } = require('./benign_queries');
 
 function canonical(value) {
     if (Array.isArray(value)) return value.map(canonical);
@@ -50,7 +51,7 @@ function main() {
         .map(op => [op, { sessions: 0, events: 0, matchedEvents: 0, unexpectedEvents: 0 }]));
     const fingerprints = new Map();
     for (const record of records) {
-        const test = cases.find(test => test.id === record.caseId);
+        const test = [...cases, ...queryCases].find(test => test.id === record.caseId);
         assert.ok(test);
         assert.equal(record.stages.length, 3);
         const raw = requests.filter(request => request.id === record.id);
@@ -62,6 +63,10 @@ function main() {
             const control = metadata.planSource === 'authored_positive_control';
             assert.equal(request.httpStatus, control ? null : 200);
             assert.equal(request.payload.temperature, metadata.temperature);
+            if (metadata.caseSet === 'benign_queries') {
+                assert.deepEqual(request.payload.response_format.json_schema.schema, metadata.querySchemas[request.role]);
+                assert.ok(metadata.seedSchedule.find(s => s.caseId === record.caseId).seeds.includes(request.payload.seed));
+            }
             assert.equal(request.traceId, record.traceId);
             const response = control ? null : JSON.parse(request.raw);
             if (!control) assert.equal(response.choices[0].finish_reason, 'stop');

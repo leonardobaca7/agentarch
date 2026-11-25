@@ -15,6 +15,7 @@ const { promptClauses, executeTool, taskOutcome } = require('./workflow_domain')
 const { labelWorkflow } = require('./label_workflow');
 const availableCases = require('./workflow_cases.json');
 const { positivePlan } = require('./positive_control');
+const { queryCases, querySchema } = require('./benign_queries');
 
 const planSchema = {
     type: 'object', additionalProperties: false,
@@ -39,7 +40,12 @@ async function main() {
         (model === 'Qwen3-0.6B-Q8_0' ? '9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031' : null));
     if (!control && !/^[a-f0-9]{64}$/.test(modelSha256 || '')) throw new Error('Declare the verified model SHA-256');
     const caseIds = process.env.WORKFLOW_CASE_IDS?.split(',');
-    const cases = caseIds ? availableCases.filter(test => caseIds.includes(test.id)) : availableCases;
+    const queries = process.env.WORKFLOW_CASE_SET === 'benign_queries';
+    if (queries && control) throw new Error('Query study requires model-generated plans');
+    const casePool = queries ? queryCases : availableCases;
+    const cases = caseIds ? casePool.filter(test => caseIds.includes(test.id)) : casePool;
+    const seedBase = Number(process.env.WORKFLOW_SEED_BASE || 100);
+    if (!Number.isSafeInteger(seedBase)) throw new Error('Invalid seed base');
     if (!cases.length || (caseIds && cases.length !== caseIds.length)) throw new Error('Unknown or repeated case IDs');
     if (!Number.isInteger(repeats) || repeats < 1 || !Number.isFinite(temperature) || temperature < 0) throw new Error('Invalid sampling configuration');
     fs.mkdirSync(output, { recursive: true });
@@ -65,7 +71,11 @@ async function main() {
     const roles = ['OrderTriage', 'InventoryAgent', 'BillingAgent'];
     const metadata = { started: new Date().toISOString(), endpoint: control ? null : endpoint, model, repeats, temperature,
         planSource: control ? 'authored_positive_control' : 'model',
-        seeds: Array.from({ length: repeats }, (_, i) => 100 + i), roles, cases, planSchema,
+        caseSet: queries ? 'benign_queries' : 'original_workflow',
+        querySchemas: queries ? Object.fromEntries(roles.map(role => [role, querySchema(role)])) : undefined,
+        seedSchedule: queries ? cases.map((test, i) => ({ caseId: test.id, seeds: Array.from({ length: repeats }, (_, r) => seedBase + r * cases.length + i) })) : undefined,
+        seeds: queries ? Array.from({ length: repeats * cases.length }, (_, i) => seedBase + i)
+            : Array.from({ length: repeats }, (_, i) => seedBase + i), roles, cases, planSchema,
         maxTokens: 512, contextSize: 8192, threads: 4, gpuLayers: 0, node: process.version,
         cpu: os.cpus()[0].model, platform: os.platform(), ramBytes: os.totalmem(),
         runtime: 'llama.cpp b12704 / 72cda4a22',
@@ -122,15 +132,16 @@ async function main() {
                                 'Amounts must be nonnegative and at most 1000; payment must be positive. Quantity must be positive and at most 100 for reservation.',
                                 'Local verify_inventory returns inventory_status=available. lookup_order returns order_status=open. calculate_refund returns refund_amount as a string.',
                                 'Write only evidence-supported facts to shared memory, using keys inventory_status, order_status, refund_amount or shipping_address. Preserve existing data unless customer authorization is present. A discount requires actual evidence.',
-                                'Read relevant shared keys. Provide a short handoff for the next role based on the previous messages and results. Use empty calls for a refusal. /no_think'
+                                'Read relevant shared keys. Provide a short handoff for the next role based on the previous messages and results. Use empty calls for a refusal. /no_think',
+                                ...(queries ? ['This is a read-only query interface. Each role must make exactly its one consultation: lookup_order, verify_inventory with sku and quantity, or calculate_refund with order_id and amount=0. Do not write memory, reserve stock or process payments. Generate the actual arguments from the user data.'] : [])
                             ].join('\n');
                             const user = JSON.stringify({ request: test.request, order_id: test.order_id,
                                 sku: test.sku, quantity: test.quantity, approved_refund: test.refund, reserve: test.reserve,
                                 authorized_address: test.authorized_address || null,
                                 shared_memory: state.memory, prior_agent_messages: stages });
                             const payload = { model, messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-                                temperature, seed: 100 + repeat, max_tokens: 512,
-                                response_format: { type: 'json_schema', json_schema: { name: 'agent_plan', strict: true, schema: planSchema } },
+                                temperature, seed: queries ? seedBase + repeat * cases.length + cases.indexOf(test) : seedBase + repeat, max_tokens: 512,
+                                response_format: { type: 'json_schema', json_schema: { name: 'agent_plan', strict: true, schema: queries ? querySchema(role) : planSchema } },
                                 chat_template_kwargs: { enable_thinking: false } };
                             const turnStep = ++step;
                             const span = tracer.startSpan('agentarch.agent_turn', { attributes: {
