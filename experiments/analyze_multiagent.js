@@ -188,7 +188,7 @@ function main() {
             .map(([op, m]) => [opName(op), m.sessions, m.events, m.matchedEvents, m.unexpectedEvents])));
     fs.writeFileSync(path.join(assetDir, 'tabla_viii_solicitudes.tex'), table('Resultados agrupados por solicitud', 'tab:multi_cases', 'llrrrr',
         ['ID', 'Tipo', 'Válidas', 'Con deriva', 'Planes distintos', 'Tareas completas'], byCase.map(c => [c.caseId,
-            c.kind === 'nominal' ? 'Petición benigna' : c.kind === 'prompt_fault' ? 'Prompt perturbado' : 'Adversarial',
+            c.kind === 'benign_query' ? 'Consulta tipada' : c.kind === 'nominal' ? 'Petición benigna' : c.kind === 'prompt_fault' ? 'Prompt perturbado' : 'Adversarial',
             c.valid, c.observedDrift, c.distinctPlans, c.taskCompleted]), true));
     const review = ['session_id,step,type,role,observed_action,reviewer_operator,reviewer_comment'];
     for (const record of records) {

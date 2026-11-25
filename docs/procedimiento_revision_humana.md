@@ -1,7 +1,10 @@
-# Revisión humana pendiente de diez sesiones
+# Procedimiento y registro de la revisión de diez sesiones
 
-Una persona debe completar esta revisión. Los archivos preparados no constituyen
-una validación humana y el asistente no firmará en nombre de los autores.
+Se recibieron los dos formularios individuales y el consenso de los autores,
+fechados el 25 de noviembre de 2026. El análisis está en
+`docs/resultados_revision_autores.md` y `results/human_review/analysis.json`.
+Los documentos originales se conservan sin modificar. La revisión corresponde
+a los autores; no se presenta como externa ni con cegamiento verificado.
 
 La muestra se encuentra en `results/consolidated_analysis/human_review_packet.json`.
 Incluye los tres casos sin alertas y siete casos con infracciones; es una selección
@@ -21,6 +24,8 @@ estimar una tasa poblacional. Se conservan los eventos y mensajes completos.
    explicar su resolución. Con dos revisores, conservar las respuestas previas
    a la discusión y documentar su acuerdo.
 
-Solo después de recibir y comprobar esas anotaciones podrá actualizarse el
-artículo con un resultado de revisión humana. No basta cambiar el estado del
-formulario ni rellenarlo automáticamente.
+El procedimiento anterior se conserva para documentar la preparación de la muestra
+y orientar revisiones futuras. El paquete JSON y el formulario vacío son los
+materiales iniciales, no el registro de finalización. Las respuestas recibidas son
+`revision_Leonardo.csv`, `revision_German.csv` y `consenso_revision.csv`; el script
+`experiments/analyze_human_review.py` compara sus etiquetas y conserva sus SHA-256.

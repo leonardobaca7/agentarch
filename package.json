@@ -15,7 +15,8 @@
     "bench:paths": "node experiments/benchmark_paths.js",
     "bench:supplement": "node experiments/benchmark_supplement.js",
     "analyze:exclusions": "node experiments/analyze_exclusions.js",
-    "analyze:consolidated": "node experiments/analyze_consolidated.js"
+    "analyze:consolidated": "node experiments/analyze_consolidated.js",
+    "analyze:queries": "node experiments/analyze_queries.js"
   },
   "keywords": [
     "multi-agent-systems",

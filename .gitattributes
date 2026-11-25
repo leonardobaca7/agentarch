@@ -1,0 +1,4 @@
+# Preserve the exact bytes of author-supplied review records across checkouts.
+results/consolidated_analysis/revision_Leonardo.csv -text
+results/consolidated_analysis/revision_German.csv -text
+results/consolidated_analysis/consenso_revision.csv -text

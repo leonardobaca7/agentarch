@@ -172,7 +172,7 @@ function runFullEvaluation() {
         wide ? String.raw`\begin{table*}[!t]` : String.raw`\begin{table}[H]`,
         String.raw`\caption{` + caption + '}',
         String.raw`\label{` + label + '}',
-        String.raw`\centering\footnotesize`,
+        String.raw`\centering\footnotesize\setlength{\tabcolsep}{3pt}`,
         wide ? String.raw`\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}` + alignment + '}'
             : String.raw`\begin{tabular}{` + alignment + '}',
         String.raw`\hline`,
@@ -199,7 +199,7 @@ function runFullEvaluation() {
     const texTable = table('Casos detectados por dimensión', 'tab:category_results', 'lrrr',
         ['Variante', 'Prompts', 'Memoria', 'Políticas'], categoryRows)
         + table(String.raw`Resultados globales (métricas en \%)`, 'tab:experimental_results', 'lrrrrrrr',
-            ['Variante', 'VP', 'FP', 'FN', 'Prec.', 'Exh.', '$F_1$', '$t^*$'], globalRows, true);
+            ['Variante', 'VP', 'FP', 'FN', 'Prec.', 'Exh.', '$F_1$', '$t^*$'], globalRows);
     fs.writeFileSync(path.join(__dirname, '../paper_assets/tabla_iv_resultados.tex'), texTable, 'utf8');
 
     // Ejecutar benchmark de latencia

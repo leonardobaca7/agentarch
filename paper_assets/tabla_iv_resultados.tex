@@ -1,7 +1,7 @@
 \begin{table}[H]
 \caption{Casos detectados por dimensión}
 \label{tab:category_results}
-\centering\footnotesize
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrr}
 \hline
 Variante & Prompts & Memoria & Políticas\\
@@ -12,11 +12,11 @@ AgentArch & 12/12 & 14/14 & 14/14\\
 \hline
 \end{tabular}
 \end{table}
-\begin{table*}[!t]
+\begin{table}[H]
 \caption{Resultados globales (métricas en \%)}
 \label{tab:experimental_results}
-\centering\footnotesize
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrrrr}
+\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrr}
 \hline
 Variante & VP & FP & FN & Prec. & Exh. & $F_1$ & $t^*$\\
 \hline
@@ -24,5 +24,5 @@ $B_1$ & 0 & 0 & 40 & -- & 0 & 0 & 0\\
 $B_2$ & 10 & 0 & 30 & 100 & 25 & 40 & 25\\
 AgentArch & 40 & 0 & 0 & 100 & 100 & 100 & 100\\
 \hline
-\end{tabular*}
-\end{table*}
+\end{tabular}
+\end{table}

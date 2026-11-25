@@ -200,7 +200,8 @@ configuración. La ausencia de alertas no garantiza la finalización del pedido.
 El [protocolo previo](docs/second_audit_protocol.md) fija las solicitudes, la
 orquestación y los criterios. Los [datos completos](results/multiagent_run/)
 conservan respuestas, mensajes transferidos, efectos, tramos, etiquetas y alertas.
-La plantilla de revisión humana tiene los campos del revisor vacíos.
+La plantilla inicial se conserva vacía. Los formularios individuales y el consenso
+aportados posteriormente por los autores están en results/consolidated_analysis/.
 
 ```powershell
 npm ci
@@ -264,9 +265,36 @@ tramos. Las diferencias entre los tiempos históricos no son una comparación
 emparejada ni prueban una aceleración. Ambos benchmarks históricos calentaban
 cada lote. Sus percentiles son percentiles de medias de lote.
 
-La [revisión humana](docs/procedimiento_revision_humana.md) sigue pendiente.
-Se entregan diez sesiones con su contexto y un formulario sin completar. Una
-revisión del asistente no se presenta como validación humana.
+## Revisión de los autores y consultas prospectivas
+
+Se recibieron dos formularios individuales y un consenso para diez sesiones.
+El acuerdo inicial exacto de conjuntos operador/paso es 9/10; la presencia de
+infracción coincide en 10/10 y los conjuntos tienen 14 pares comunes de 15 en la
+unión. La discrepancia sobre M1@16 en W04-R1 se conserva y se resuelve en el
+consenso. Los quince pares consensuados coinciden con el monitor y el anotador.
+Los dos autores coinciden en que las diez tareas están incompletas.
+
+Los [resultados](docs/resultados_revision_autores.md) y el
+[análisis](results/human_review/analysis.json) conservan las limitaciones: muestra
+dirigida, revisión por autores del sistema y recogida/cegamiento no verificados.
+No se atribuye una evaluación externa ni se extiende el resultado a las 60 sesiones.
+Los CSV originales se mantienen sin modificar, con sus SHA-256 en el análisis.
+
+Un [protocolo prospectivo](docs/prospective_queries_protocol.md) fija treinta
+sesiones de consulta: diez plantillas y tres variantes de datos, semillas 200–229,
+temperatura 0,7 y Qwen3-0.6B-Q8_0. Cada rol genera argumentos y mensajes dentro
+de una interfaz tipada de consulta, sin escrituras, reservas ni pagos. Se conservan
+todos los intentos, sin descartar ni repetir por alertas del monitor. Los
+[datos](results/prospective_queries/) y su análisis informan el desglose completo.
+Los treinta intentos fueron válidos y conformes, con cero alertas y treinta
+consultas completas: noventa peticiones al modelo y 420 tramos del SDK. No hay
+casos positivos en este lote, por lo que no estima exhaustividad ni F1 de detección.
+
+La interfaz favorece conformidad antes de inferir: no representa agentes con
+acciones libres ni una validación humana del lote nuevo. Sus negativos se
+mantienen separados de los tres del estudio original y no se agrupan para
+estimar una tasa poblacional. La finalización de una consulta tampoco se compara
+como mejora sobre las tareas originales de reserva y pago.
 
 ## Supuestos y límites
 
@@ -284,8 +312,10 @@ incorrecta puede ocultar M1. Se regenera con node experiments/instrumentation_se
 
 ## Versión y artículo
 
-La etiqueta v0.4.0-consolidated-review fija la auditoría consolidada y conserva
-v0.3.0-c2-second-review y v0.2.0-c2-review. cd6dc65 identifica benchmark_paths.js
+La etiqueta v0.5.0-human-review incorpora los formularios recibidos y el lote
+prospectivo, y conserva v0.4.0-consolidated-review y las revisiones anteriores.
+52eee33 fija el protocolo y ejecutor de consultas antes de inferir.
+cd6dc65 identifica benchmark_paths.js
 y el ejecutor y protocolo de la
 ampliación. bd1c1a1 identifica el código del
 microbenchmark original, 73dd953 incorpora esos resultados y el primer manuscrito
@@ -297,7 +327,7 @@ documenta las referencias cuestionadas y la detección de MIT por GitHub.
 
 [El fuente IEEE](paper/articulo.tex) y [el PDF](paper/articulo.pdf) incorporan
 ambas evaluaciones, los límites del etiquetado automático y los resultados de
-tarea. Las correcciones actuales están documentadas en [la respuesta consolidada](docs/respuesta_auditoria_consolidada.md).
+tarea. Las correcciones actuales están documentadas en [el informe de revisión y consultas](docs/revision_humana_y_consultas.md).
 
 ## 👥 Autores y Contacto
 

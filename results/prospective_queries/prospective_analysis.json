@@ -1,0 +1,95 @@
+{
+  "attempted": 30,
+  "valid": 30,
+  "errors": [],
+  "conformant": 30,
+  "drift": 0,
+  "FP": 0,
+  "taskComplete": 30,
+  "templates": 10,
+  "byTemplate": [
+    {
+      "template": 1,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 2,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 3,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 4,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 5,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 6,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 7,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 8,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 9,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    },
+    {
+      "template": 10,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 3,
+      "falsePositive": 0,
+      "taskComplete": 3
+    }
+  ],
+  "illustrativeUpper95": 0.09503385285530408,
+  "inferenceLimit": "Typed query-only interface specified before generation; clustered templates; not an estimate for unconstrained agents or an independent human-labelled set",
+  "quantityMismatches": []
+}
