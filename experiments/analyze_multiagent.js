@@ -67,6 +67,10 @@ function main() {
                 assert.deepEqual(request.payload.response_format.json_schema.schema, metadata.querySchemas[request.role]);
                 assert.ok(metadata.seedSchedule.find(s => s.caseId === record.caseId).seeds.includes(request.payload.seed));
             }
+            if (metadata.caseSet === 'free_queries') {
+                assert.deepEqual(request.payload.response_format.json_schema.schema, metadata.planSchema);
+                assert.ok(metadata.seedSchedule.find(s => s.caseId === record.caseId).seeds.includes(request.payload.seed));
+            }
             assert.equal(request.traceId, record.traceId);
             const response = control ? null : JSON.parse(request.raw);
             if (!control) assert.equal(response.choices[0].finish_reason, 'stop');
