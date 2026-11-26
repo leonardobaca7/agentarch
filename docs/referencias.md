@@ -44,3 +44,5 @@ La revisión bibliográfica es narrativa. Los datos editoriales se conservan en 
 - Los metadatos de Rozinat y van der Aalst corresponden a *Information Systems* 33(1), pp. 64–95, 2008. El capítulo de Bartocci et al. corresponde a LNCS 10457, pp. 1–33, 2018.
 
 Las fechas de consulta se mantienen en cada entrada. Los metadatos editoriales conservados están en [reference_metadata.json](../results/human_review/reference_metadata.json). Reducir la bibliografía no modifica los registros experimentales ni atribuye publicación revisada a un preprint.
+
+La comprobación de los DOI en Crossref y DataCite se conserva en [reference_checks.json](../paper/reference_checks.json). El índice oficial de CEUR-WS y el PDF de COMPASS confirman pp. 30–38; el título citado sigue el PDF, pues el índice usa «Optimization» donde el documento dice «Analysis». ACL Anthology y el registro de Crossref coinciden en el DOI publicado de AgentArch empresarial, sin `v1/`.

@@ -10,6 +10,7 @@ Los registros originales, los resúmenes y los formularios permanecen en `result
 | Piloto por rol | 12 / 24 | 0; 0/12 | 6; 6/12 | 12; 12/12 |
 | Pedidos, 0.6B | 57 / 60 | 0; 0/57 | 33; 13/57 | 57; 57/57 |
 | Pedidos, 1.7B | 12 / 12 | 0; 0/12 | 12; 9/12 | 12; 12/12 |
+| Control escrito a mano | 2 / 12 | 0; 0/2 | 0; 0/2 | 2; 2/2 |
 | Consulta general | 26 / 30 | 0; 0/26 | 25; 16/26 | 26; 26/26 |
 
 No hubo falsos positivos en los conformes de esas condiciones. Los denominadores pequeños y las repeticiones impiden extrapolar una tasa general. Las treinta consultas tipadas fueron conformes y completas; no contienen positivos para estimar exhaustividad.
@@ -48,3 +49,5 @@ La revisión corresponde a los dos autores y a una muestra dirigida; no se docum
 Las medianas conformes del núcleo van de 0,012 a 0,416 µs en las entradas medidas. El adaptador de turno tiene medianas de 0,301 µs conforme y 0,475 µs con alerta. Las cien medias por lote, dispersión y percentiles están en los directorios de [núcleo](../results/latency_paths/) y [suplemento](../results/latency_supplement/). La tabla del artículo se genera directamente de ellos.
 
 La sensibilidad a metadatos contiene cuatro casos. El resumen correcto del texto alterado activa P3 y la marca no verificada activa M1. Informar el resumen canónico o una verificación falsa oculta esas infracciones: son dos omisiones controladas. La precisión del monitor depende de la evidencia entregada por el instrumentador.
+
+El lote tipado contiene exactamente 420 tramos: 30 de sesión, 90 de turno, 90 llamadas a herramientas, 120 operaciones de memoria (30 escrituras iniciales y 90 lecturas) y 90 transferencias `agentarch.handoff`. Estas últimas explican la diferencia respecto de un conteo de 330 sin transferencias.

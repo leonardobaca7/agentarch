@@ -1,8 +1,9 @@
-\begin{table*}[!t]
-\caption{Detección y localización del primer paso por conjunto}
+\begin{table}[!t]
+\caption{Detección y primer paso. Referencia: etiquetas preparadas en guionizados; anotador automático en los demás conjuntos}
 \label{tab:detection}
 \centering\footnotesize
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llrrrrr}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}llrrrrr}
 \hline
 Conjunto & Variante & VP & FP & VN & FN & Primer paso\\
 \hline
@@ -12,7 +13,13 @@ Guionizado & $B_1$ & 0 & 0 & 10 & 40 & 0/40\\
 Pedidos, 0.6B & $B_1$ & 0 & 0 & 3 & 57 & 0/57\\
  & $B_2$ & 33 & 0 & 3 & 24 & 13/57\\
  & AgentArch & 57 & 0 & 3 & 0 & 57/57\\
+Pedidos, 1.7B & $B_1$ & 0 & 0 & 0 & 12 & 0/12\\
+ & $B_2$ & 12 & 0 & 0 & 0 & 9/12\\
+ & AgentArch & 12 & 0 & 0 & 0 & 12/12\\
+Control manual & $B_1$ & 0 & 0 & 10 & 2 & 0/2\\
+ & $B_2$ & 0 & 0 & 10 & 2 & 0/2\\
+ & AgentArch & 2 & 0 & 10 & 0 & 2/2\\
 Consulta general & $B_1$ & 0 & 0 & 4 & 26 & 0/26\\
  & $B_2$ & 25 & 0 & 4 & 1 & 16/26\\
  & AgentArch & 26 & 0 & 4 & 0 & 26/26\\
-\hline\end{tabular*}\end{table*}
+\hline\end{tabular*}\end{table}

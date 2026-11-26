@@ -2,12 +2,13 @@ const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const load = file => JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
 const row = cells => cells.join(' & ') + String.raw`\\`;
-const table = (caption, label, columns, header, rows) => [
-    String.raw`\begin{table*}[!t]`, String.raw`\caption{` + caption + '}',
+const table = (caption, label, columns, header, rows, wide = true) => [
+    '\\begin{' + (wide ? 'table*' : 'table') + '}[!t]', String.raw`\caption{` + caption + '}',
     String.raw`\label{` + label + '}', String.raw`\centering\footnotesize`,
-    String.raw`\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}` + columns + '}',
+    String.raw`\setlength{\tabcolsep}{3pt}`,
+    '\\begin{tabular*}{' + (wide ? '\\textwidth' : '\\columnwidth') + '}{@{\\extracolsep{\\fill}}' + columns + '}',
     String.raw`\hline`, row(header), String.raw`\hline`, ...rows.map(row),
-    String.raw`\hline\end{tabular*}\end{table*}`, ''
+    '\\hline\\end{tabular*}\\end{' + (wide ? 'table*' : 'table') + '}', ''
 ].join('\n');
 const cohorts = [
     ['Piloto por rol', '8 solicitudes', 'live_pilot'],
@@ -33,6 +34,8 @@ const detectionRows = [];
 for (const [label, count, metrics, keys] of [
     ['Guionizado', 40, scripted.metrics, ['B1', 'B2', 'B_prop']],
     ['Pedidos, 0.6B', 57, load('results/multiagent_run/summary.json').metrics, ['B1', 'B2', 'AgentArch']],
+    ['Pedidos, 1.7B', 12, load('results/larger_model/summary.json').metrics, ['B1', 'B2', 'AgentArch']],
+    ['Control manual', 2, load('results/positive_control/summary.json').metrics, ['B1', 'B2', 'AgentArch']],
     ['Consulta general', 26, load('results/free_queries/summary.json').metrics, ['B1', 'B2', 'AgentArch']]
 ]) {
     for (const [index, key] of keys.entries()) {
@@ -43,8 +46,8 @@ for (const [label, count, metrics, keys] of [
     }
 }
 fs.writeFileSync('paper_assets/editorial_detection.tex', table(
-    'Detección y localización del primer paso por conjunto', 'tab:detection', 'llrrrrr',
-    ['Conjunto', 'Variante', 'VP', 'FP', 'VN', 'FN', 'Primer paso'], detectionRows));
+    'Detección y primer paso. Referencia: etiquetas preparadas en guionizados; anotador automático en los demás conjuntos', 'tab:detection', 'llrrrrr',
+    ['Conjunto', 'Variante', 'VP', 'FP', 'VN', 'FN', 'Primer paso'], detectionRows, false));
 const exclusions = load('results/consolidated_analysis/exclusions.json');
 fs.writeFileSync('paper_assets/editorial_exclusions.tex', table(
     'Sensibilidad a M1 y a las perturbaciones de prompt', 'tab:exclusions', 'lrrrrr',
@@ -62,6 +65,6 @@ for (const r of times) {
 fs.writeFileSync('paper_assets/editorial_times.tex', table(
     String.raw`Tiempo por llamada ($\mu\mathrm{s}$): estadísticos de cien medias de lote`, 'tab:times', 'llrrrrrr',
     ['Entrada', 'Camino', 'Media', 'DE', 'Mínimo', 'Mediana', 'p95', 'p99'], times.map(r => [
-        r.name, r.alert ? 'Con alerta' : 'Conforme', ...[r.mean, r.sd, r.min, r.median, r.p95, r.p99].map(v => v.toFixed(3))
+        r.name === 'Memoria' ? 'Escritura' : r.name, r.alert ? 'Con alerta' : 'Conforme', ...[r.mean, r.sd, r.min, r.median, r.p95, r.p99].map(v => v.toFixed(3).replace('.', ','))
     ])));
 console.log('Generated four manuscript tables from preserved result files.');

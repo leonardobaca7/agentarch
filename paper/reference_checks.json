@@ -1,0 +1,236 @@
+{
+  "checked": "2026-11-26",
+  "records": [
+    {
+      "key": "li",
+      "doi": "10.1145/3774748.3795870",
+      "source": "https://api.crossref.org/works/10.1145/3774748.3795870",
+      "status": "resolved",
+      "title": "What Do We Architect When We Architect LLM Agent Systems?",
+      "pages": "484-486",
+      "venue": [
+        "Proceedings of the 2026 IEEE/ACM 48th International Conference on Software Engineering"
+      ]
+    },
+    {
+      "key": "miranda",
+      "doi": "10.5220/0014236700004058",
+      "source": "https://api.crossref.org/works/10.5220/0014236700004058",
+      "status": "resolved",
+      "title": "Bridging MDE and LLM-Based Agent Frameworks for Multi-Agent Systems: A Quasi-Systematic Review and Metamodel",
+      "pages": "33-44",
+      "venue": [
+        "Proceedings of the 14th International Conference on Model-Based Software and Systems Engineering"
+      ]
+    },
+    {
+      "key": "liu",
+      "doi": "10.48550/arXiv.2405.10467",
+      "source": "https://api.datacite.org/dois/10.48550/arXiv.2405.10467",
+      "status": "resolved",
+      "title": "Agent Design Pattern Catalogue: A Collection of Architectural Patterns for Foundation Model based Agents",
+      "pages": null,
+      "venue": null
+    },
+    {
+      "key": "deangelis",
+      "doi": "10.48550/arXiv.2607.03135",
+      "source": "https://api.datacite.org/dois/10.48550/arXiv.2607.03135",
+      "status": "resolved",
+      "title": "Detecting Architectural Drift in Safety-Critical Firmware through Runtime Trace Analysis",
+      "pages": null,
+      "venue": null
+    },
+    {
+      "key": "conformance",
+      "doi": "10.1016/j.is.2007.07.001",
+      "source": "https://api.crossref.org/works/10.1016/j.is.2007.07.001",
+      "status": "confirmed by institutional source",
+      "error": "HTTP Error 429: Too Many Requests",
+      "fallback_source": "https://research.tue.nl/en/publications/conformance-checking-of-processes-based-on-monitoring-real-behavi/",
+      "title": "Conformance checking of processes based on monitoring real behavior",
+      "pages": "64-95",
+      "note": "Crossref request rate-limited (429); DOI and metadata confirmed by TU Eindhoven"
+    },
+    {
+      "key": "rv",
+      "doi": "10.1007/978-3-319-75632-5_1",
+      "source": "https://api.crossref.org/works/10.1007/978-3-319-75632-5_1",
+      "status": "resolved",
+      "title": "Introduction to Runtime Verification",
+      "pages": "1-33",
+      "venue": [
+        "Lecture Notes in Computer Science",
+        "Lectures on Runtime Verification"
+      ]
+    },
+    {
+      "key": "contracts",
+      "doi": "10.48550/arXiv.2603.18096",
+      "source": "https://api.datacite.org/dois/10.48550/arXiv.2603.18096",
+      "status": "resolved",
+      "title": "A Trace-Based Assurance Framework for Agentic AI Orchestration: Contracts, Testing, and Governance",
+      "pages": null,
+      "venue": null
+    },
+    {
+      "key": "agentspec",
+      "doi": "10.1145/3744916.3764546",
+      "source": "https://api.crossref.org/works/10.1145/3744916.3764546",
+      "status": "resolved",
+      "title": "AgentSpec: Customizable Runtime Enforcement for Safe and Reliable LLM Agents",
+      "pages": "2938-2950",
+      "venue": [
+        "Proceedings of the 2026 IEEE/ACM 48th International Conference on Software Engineering"
+      ]
+    },
+    {
+      "key": "mcp",
+      "doi": "10.3390/electronics15132829",
+      "source": "https://api.crossref.org/works/10.3390/electronics15132829",
+      "status": "resolved",
+      "title": "Runtime Policy Enforcement for MCP-Based LLM Agents",
+      "pages": "2829",
+      "venue": [
+        "Electronics"
+      ]
+    },
+    {
+      "key": "mentor",
+      "doi": "10.48550/arXiv.2610.17039",
+      "source": "https://api.datacite.org/dois/10.48550/arXiv.2610.17039",
+      "status": "resolved",
+      "title": "MENTOR: Procedural Shielding of Tool-Using LLM Agents",
+      "pages": null,
+      "venue": null
+    },
+    {
+      "key": "tracefix",
+      "doi": "10.1145/3786335.3813159",
+      "source": "https://api.crossref.org/works/10.1145/3786335.3813159",
+      "status": "resolved",
+      "title": "TraceFix: Repairing Agent Coordination Protocols with TLA+ Counterexamples",
+      "pages": "181-196",
+      "venue": [
+        "Proceedings of the ACM Conference on AI and Agentic Systems"
+      ]
+    },
+    {
+      "key": "agentops",
+      "doi": "10.48550/arXiv.2411.05285",
+      "source": "https://api.datacite.org/dois/10.48550/arXiv.2411.05285",
+      "status": "resolved",
+      "title": "AgentOps: Enabling Observability of LLM Agents",
+      "pages": null,
+      "venue": null
+    },
+    {
+      "key": "telemetry",
+      "doi": "10.1145/3805760.3814931",
+      "source": "https://api.crossref.org/works/10.1145/3805760.3814931",
+      "status": "resolved",
+      "title": "AgentTelemetry: A Fault Detection Benchmark and Toolkit for LLM Agent Observability",
+      "pages": "380-387",
+      "venue": [
+        "Proceedings of the 3rd ACM International Conference on AI-Powered Software"
+      ]
+    },
+    {
+      "key": "faults",
+      "doi": "10.1109/ICST69053.2026.00037",
+      "source": "https://api.crossref.org/works/10.1109/ICST69053.2026.00037",
+      "status": "resolved",
+      "title": "Observability and Fault Injection for LLM-Based Multi-Agent Systems in Software Engineering",
+      "pages": "211-215",
+      "venue": [
+        "2026 IEEE International Conference on Software Testing, Verification and Validation (ICST)"
+      ]
+    },
+    {
+      "key": "compass",
+      "status": "confirmed by proceedings and PDF",
+      "source": "https://ceur-ws.org/Vol-3996/",
+      "pages": "30-38",
+      "pdf": "https://ceur-ws.org/Vol-3996/paper-5.pdf"
+    },
+    {
+      "key": "prompts",
+      "doi": "10.1109/MSR66628.2025.00106",
+      "source": "https://api.crossref.org/works/10.1109/MSR66628.2025.00106",
+      "status": "resolved",
+      "title": "Prompting in the Wild: An Empirical Study of Prompt Evolution in Software Repositories",
+      "pages": "686-698",
+      "venue": [
+        "2025 IEEE/ACM 22nd International Conference on Mining Software Repositories (MSR)"
+      ]
+    },
+    {
+      "key": "claw",
+      "doi": "10.1145/3805621.3807648",
+      "source": "https://api.crossref.org/works/10.1145/3805621.3807648",
+      "status": "resolved",
+      "title": "C\n                    <scp>law</scp>\n                    VM: Harness-Managed Virtual Memory for Stateful Tool-Using LLM Agents",
+      "pages": "1-12",
+      "venue": [
+        "Proceedings of the Sixth European Workshop on Machine Learning and Systems"
+      ]
+    },
+    {
+      "key": "govmem",
+      "doi": "10.48550/arXiv.2607.02579",
+      "source": "https://api.datacite.org/dois/10.48550/arXiv.2607.02579",
+      "status": "resolved",
+      "title": "When Not to Write Memory: Governing False Promotion from Correlated Agent Traces",
+      "pages": null,
+      "venue": null
+    },
+    {
+      "key": "memarch",
+      "doi": "10.48550/arXiv.2603.18330",
+      "source": "https://api.datacite.org/dois/10.48550/arXiv.2603.18330",
+      "status": "resolved",
+      "title": "MemArchitect: A Policy Driven Memory Governance Layer",
+      "pages": null,
+      "venue": null
+    },
+    {
+      "key": "enterpriseagentarch",
+      "doi": "10.18653/2026.aacl-long.44",
+      "source": "https://api.crossref.org/works/10.18653/2026.aacl-long.44",
+      "status": "resolved",
+      "title": "AgentArch: A Benchmark for Evaluating Agent Architectures in Enterprise Workflows",
+      "pages": "915-933",
+      "venue": [
+        "Proceedings of the 15th International Joint Conference on Natural Language Processing and the 5th Conference of the Asia-Pacific Chapter of the Association for Computational Linguistics (Volume 1: Long Papers)"
+      ]
+    },
+    {
+      "key": "otel",
+      "status": "no DOI in reference"
+    },
+    {
+      "key": "genaisemconv",
+      "status": "no DOI in reference"
+    },
+    {
+      "key": "qwen",
+      "status": "no DOI in reference"
+    },
+    {
+      "key": "llamacpp",
+      "status": "no DOI in reference"
+    },
+    {
+      "key": "qwenlarger",
+      "status": "no DOI in reference"
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/leonardobaca7/agentarch",
+    "visibility": "public",
+    "checked_tag": "v0.7.1-editorial",
+    "license": "MIT",
+    "license_url": "https://github.com/leonardobaca7/agentarch/blob/v0.7.1-editorial/LICENSE",
+    "method": "GitHub connector repository metadata and tagged LICENSE content"
+  }
+}

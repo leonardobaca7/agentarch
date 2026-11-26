@@ -13,7 +13,7 @@ number,key,title,verification_source,edition_note
 12,agentops,AgentOps: Enabling observability of LLM agents,https://doi.org/10.48550/arXiv.2411.05285,Precise arXiv edition in local corpus
 13,telemetry,AgentTelemetry: A fault detection benchmark and toolkit for LLM agent observability,https://doi.org/10.1145/3805760.3814931,Publisher or official software/model metadata
 14,faults,Observability and fault injection for LLM-based multi-agent systems in software engineering,https://doi.org/10.1109/ICST69053.2026.00037,Publisher or official software/model metadata
-15,compass,COMPASS: A process mining-based methodology for prompt analysis of large language model agents,https://ceur-ws.org/Vol-3996/paper-5.pdf,Publisher or official software/model metadata
+15,compass,COMPASS: A process mining-based methodology for prompt analysis of large language model agents,https://ceur-ws.org/Vol-3996/paper-5.pdf,CEUR-WS volume index and PDF checked 2026-11-26: pp.30-38; title follows PDF
 16,prompts,Prompting in the wild: An empirical study of prompt evolution in software repositories,https://doi.org/10.1109/MSR66628.2025.00106,Publisher or official software/model metadata
 17,claw,ClawVM: Harness-managed virtual memory for stateful tool-using LLM agents,https://doi.org/10.1145/3805621.3807648,ACM-deposited Crossref metadata reconfirmed 2026-11-25: pp.1-12
 18,govmem,When not to write memory: Governing false promotion from correlated agent traces,https://doi.org/10.48550/arXiv.2607.02579,Deliberate citation of arXiv2607.02579v1; arXiv notes MLISE acceptance; no proceedings pagination inferred

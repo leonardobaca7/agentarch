@@ -1,10 +1,10 @@
 {
-  "version": "v0.7.1-editorial",
+  "version": "v0.7.2-editorial",
   "date": "2026-11-26",
   "format": "IEEEtran conference, two columns, standard margins and text size",
   "pages_including_references": 6,
   "references": 25,
-  "abstract_words_approx": 183,
+  "abstract_words_approx": 137,
   "first_citation_order_matches_bibliography": true,
   "reference_metadata_order_matches_bibliography": true,
   "tables": [
@@ -23,8 +23,8 @@
     {
       "label": "tab:detection",
       "number": "III",
-      "page": 5,
-      "first_mention_page": 4
+      "page": 4,
+      "first_mention_page": 3
     },
     {
       "label": "tab:exclusions",
@@ -35,8 +35,8 @@
     {
       "label": "tab:times",
       "number": "V",
-      "page": 5,
-      "first_mention_page": 4
+      "page": 6,
+      "first_mention_page": 5
     }
   ],
   "figures": [
@@ -147,10 +147,23 @@
     "results/prospective_queries/tables/tabla_vii_operadores.tex": "369c5e7c13ecfe6ba304551da121f52496c4b2b220143f10c431061154e56080",
     "results/prospective_queries/tables/tabla_vi_multiagente.tex": "39c70422ef15b0ecf4f77e6c121dadf7fd904b8b824fbc19c9184b8479c482dc"
   },
-  "visual_review": "All six final rendered pages inspected; figure captions, table order, future work and reference layout checked.",
+  "visual_review": "All six final pages inspected, including 15 detection rows, decimal commas, figure credits, validity threats, future work and bibliography.",
   "all_tables_and_figures_first_mentioned_before_display": true,
   "figure_source_statements": "Both diagrams: Fuente: elaboración propia.",
   "future_work_section_present": true,
   "introduction_contribution_paragraph": "Cites conformance checking and runtime verification as foundations; identifies AgentArch as the contribution.",
-  "pdf_sha256": "8804ac20f0879c21f56f37e72b048b0dc4f9668982adbd459434b20a9e5c4891"
+  "pdf_sha256": "f9232ecb352c1b5b7ce920c8270f9cee14ae4b23a907846a57ebfb78ae36d9dd",
+  "typed_query_span_breakdown": {
+    "agentarch.memory_op": 120,
+    "agentarch.agent_turn": 90,
+    "agentarch.tool_call": 90,
+    "agentarch.handoff": 90,
+    "agentarch.session": 30
+  },
+  "detector_rows_added": [
+    "Qwen3-1.7B: AgentArch 12/12; B2 12/12 with first step 9/12",
+    "Authored controls: AgentArch 2/2; B1 and B2 0/2; all three TN=10"
+  ],
+  "reference_metadata_checks": "paper/reference_checks.json",
+  "historical_latency_comparison_in_manuscript": false
 }
