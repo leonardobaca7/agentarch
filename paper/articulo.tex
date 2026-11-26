@@ -36,10 +36,10 @@ Un registro sin errores de transporte puede contener una operación ajena al rol
 
 El chequeo de conformidad relaciona un modelo de proceso con sus registros de ejecución \cite{conformance}. La verificación en tiempo de ejecución, por su parte, evalúa propiedades especificadas a partir de los eventos observados \cite{rv}. En un sistema de agentes, este enfoque permite examinar tanto las herramientas invocadas como las cláusulas activas y el estado de memoria que acompaña a las decisiones.
 
-AgentArch concreta esa idea mediante un modelo de comportamiento \(B=\langle P,M,\Pi\rangle\), nueve operadores de violación y un procesador de trazas. El monitor produce alertas vinculadas a pasos de la sesión y conserva la evidencia para su inspección. La evaluación combina escenarios controlados, inferencia con tres roles, controles de ejecución, revisión de una muestra y dos condiciones de consulta. Se estudian por separado la detección de infracciones y los efectos reales del pedido.
+Sobre la base del chequeo de conformidad y la verificación en tiempo de ejecución \cite{conformance,rv}, proponemos AgentArch: un monitor con un modelo de comportamiento \(B=\langle P,M,\Pi\rangle\), nueve operadores de violación y un procesador de trazas. El monitor produce alertas vinculadas a pasos de la sesión y conserva la evidencia para su inspección. La evaluación combina escenarios controlados, inferencia con tres roles, controles de ejecución, revisión de una muestra y dos condiciones de consulta. Se estudian por separado la detección de infracciones y los efectos reales del pedido.
 
 \section{Trabajos relacionados}
-La revisión es narrativa y se centra en arquitectura de agentes, verificación, observabilidad y gobierno de memoria. Se consideran mecanismos que describen restricciones o evidencia útiles para contrastar el diseño con una ejecución. Esta organización permite situar la propuesta sin atribuir exhaustividad a la selección bibliográfica.
+La revisión narrativa considera arquitectura de agentes, verificación, observabilidad y gobierno de memoria para situar la propuesta. La selección no pretende ser exhaustiva.
 
 Los contratos de aseguramiento sobre trazas separan las obligaciones de un sistema de la evidencia empleada para comprobarlas \cite{contracts}. AgentSpec expresa reglas mediante disparadores, predicados y acciones, y permite intervenir durante la ejecución de agentes \cite{agentspec}. Estos trabajos proporcionan un punto de comparación para distinguir especificación, detección y aplicación de restricciones.
 
@@ -96,7 +96,7 @@ La Fig.~\ref{fig:architecture} resume el recorrido de la evidencia. El núcleo r
 \boxstep{Chequeo con \(B\) y actualización de estado}
 \downstep
 \boxstep{Eventos de infracción en la cola de auditoría}
-\caption{Flujo de observación de AgentArch. El monitor procesa los tramos y conserva las alertas sin modificar las acciones del agente.}
+\caption{Flujo de observación de AgentArch. El monitor contrasta los tramos con la especificación \(B\), actualiza su estado y conserva las alertas sin modificar las acciones del agente. Fuente: elaboración propia.}
 \label{fig:architecture}
 \end{figure}
 
@@ -114,10 +114,10 @@ El dominio representa atención de pedidos. OrderTriage consulta y deriva solici
 \centering
 \boxstep{OrderTriage: consulta del pedido}
 \downstep
-\boxstep{InventoryAgent: consulta y reserva}
+\boxstep{InventoryAgent: consulta; reserva si procede}
 \downstep
-\boxstep{BillingAgent: cotización y pago}
-\caption{Flujo de tres roles. Los enlaces transfieren mensajes, resultados de herramientas y estado de memoria dentro de la misma sesión.}
+\boxstep{BillingAgent: cotiza; paga si procede}
+\caption{Flujo de los tres roles en la atención de pedidos. Las flechas indican el orden de los turnos; cada rol recibe mensajes, resultados de herramientas y memoria de los anteriores. Las reservas y los pagos dependen del caso. Fuente: elaboración propia.}
 \label{fig:workflow}
 \end{figure}
 
@@ -177,15 +177,19 @@ La concordancia automática está condicionada por políticas compartidas y el c
 
 No se observaron falsos positivos, pero los denominadores son diferentes y pequeños. Bajo un modelo binomial ideal, la cota unilateral al 95\% para cero FP en \(n\) conformes es \(p_U=1-0.05^{1/n}\). Da 25,9\% para diez nominales guionizados, 63,2\% para los tres conformes de pedidos y 9,5\% para treinta consultas tipadas. Estas cifras ilustran el efecto del tamaño muestral; las repeticiones y restricciones de cada condición impiden interpretarlas como tasas generales. Los cuatro conformes del esquema general se informan separadamente, sin sumar controles ni condiciones para mejorar una estimación.
 
-Los tiempos caracterizan el núcleo y la entrada al adaptador. La medición histórica de cincuenta lotes dio medias conformes de 0,189/0,079/0,582 \(\mu\mathrm{s}\) para turno, escritura y herramienta, frente a 0,086/0,020/0,439 en la medición ampliada. Ambas calentaban cada lote, pero cambiaron número, orden y caminos de ejecución. Sin un diseño emparejado no puede atribuirse la diferencia al calentamiento ni afirmarse una aceleración. Con cien observaciones, p99 depende de las dos mayores medias; tampoco representa el percentil de una llamada individual ni el costo extremo a extremo.
+Los tiempos caracterizan el núcleo y la entrada al adaptador. El ensayo histórico de cincuenta lotes y el ampliado de cien incluyeron calentamiento, pero cambiaron el orden y los caminos medidos. Sin un diseño emparejado, sus diferencias no demuestran una aceleración. Las medias originales se conservan en el artefacto. El p99 ampliado depende de las dos mayores medias y no representa llamadas individuales ni el costo extremo a extremo.
+
+\section{Trabajo futuro}
+Se propone ampliar las sesiones conformes generadas por modelos en consultas, reservas y pagos, con interfaces menos restrictivas. Los casos se fijarán antes de ejecutar y se conservarán todos los intentos sin seleccionarlos por las alertas. Incorporar más modelos y dominios, con comparaciones emparejadas, permitirá estudiar los falsos positivos en otras condiciones.
+
+También se plantea exigir precedencias exitosas sobre el mismo recurso y contrastar mensajes con efectos de los servicios. La revisión se ampliará con anotaciones individuales de los autores previas a consultar las alertas, conservando desacuerdos y consenso. La medición extremo a extremo incluirá creación y exportación de tramos, memoria y concurrencia.
 
 \section{Conclusiones}
-AgentArch representa obligaciones de prompts, memoria y herramientas mediante nueve condiciones observables sobre trazas. La evaluación documenta cobertura de cuarenta infracciones preparadas, coincidencia en 57 sesiones infractoras con modelo y persistencia de esa coincidencia en 28 al retirar M1 y los prompts perturbados. La revisión de diez sesiones conserva un desacuerdo inicial y un consenso de quince pares coincidentes con el monitor.
+AgentArch representa obligaciones de prompts, memoria y herramientas mediante nueve condiciones sobre trazas. Detectó cuarenta infracciones preparadas y 57 sesiones infractoras con modelo; 28 permanecen al retirar M1 y los prompts perturbados. La revisión conserva un desacuerdo inicial y un consenso de quince pares coincidentes con el monitor.
 
 Las consultas prospectivas aportan treinta conformes con interfaz tipada y cuatro con esquema general, sin descartar intentos por alertas. Su contraste, junto con los controles y los resultados incompletos de tarea, muestra por qué detectar una infracción y resolver un pedido son medidas distintas. Los registros y las reglas permiten examinar esa diferencia y relacionar cada alerta con evidencia concreta, dentro de las condiciones evaluadas.
 
-El código, los datos, los formularios y la documentación técnica están disponibles bajo licencia MIT en \url{https://github.com/leonardobaca7/agentarch}, versión \texttt{v0.7.0-editorial}. El manuscrito y sus tablas se generan a partir de resultados preservados.
+El artefacto, con código, datos, formularios y documentación, está disponible bajo licencia MIT en \url{https://github.com/leonardobaca7/agentarch}, versión \texttt{v0.7.1-editorial}.
 
-\IEEEtriggeratref{8}
 \input{referencias.tex}
 \end{document}

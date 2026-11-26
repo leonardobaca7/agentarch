@@ -1,5 +1,5 @@
 {
-  "version": "v0.7.0-editorial",
+  "version": "v0.7.1-editorial",
   "date": "2026-11-26",
   "format": "IEEEtran conference, two columns, standard margins and text size",
   "pages_including_references": 6,
@@ -11,51 +11,52 @@
     {
       "label": "tab:operators",
       "number": "I",
-      "page": 3
+      "page": 3,
+      "first_mention_page": 2
     },
     {
       "label": "tab:cohorts",
       "number": "II",
-      "page": 4
+      "page": 4,
+      "first_mention_page": 3
     },
     {
       "label": "tab:detection",
       "number": "III",
-      "page": 5
+      "page": 5,
+      "first_mention_page": 4
     },
     {
       "label": "tab:exclusions",
       "number": "IV",
-      "page": 5
+      "page": 5,
+      "first_mention_page": 4
     },
     {
       "label": "tab:times",
       "number": "V",
-      "page": 5
+      "page": 5,
+      "first_mention_page": 4
     }
   ],
   "figures": [
     {
       "label": "fig:architecture",
       "number": "1",
-      "page": 3
+      "page": 3,
+      "first_mention_page": 2
     },
     {
       "label": "fig:workflow",
       "number": "2",
-      "page": 3
+      "page": 3,
+      "first_mention_page": 2
     }
   ],
   "undefined_references": false,
   "overfull_boxes": false,
   "technical_documentation_local_links_valid": true,
-  "unit_checks": [
-    "nine drift operators",
-    "SDK session isolation and cleanup",
-    "model failure propagation",
-    "workflow business effects and annotation",
-    "quantile interpolation and sample deviation"
-  ],
+  "unit_checks": "Previously passed in v0.7.0-editorial; no implementation changes in this editorial correction.",
   "generated_tables": "npm run paper:assets; reads preserved results without running inference",
   "preserved_result_files": 85,
   "all_result_sha256_unchanged": true,
@@ -146,6 +147,10 @@
     "results/prospective_queries/tables/tabla_vii_operadores.tex": "369c5e7c13ecfe6ba304551da121f52496c4b2b220143f10c431061154e56080",
     "results/prospective_queries/tables/tabla_vi_multiagente.tex": "39c70422ef15b0ecf4f77e6c121dadf7fd904b8b824fbc19c9184b8479c482dc"
   },
-  "visual_review": "All six rendered pages inspected; tables, figures, typography and final reference columns checked.",
-  "pdf_sha256": "afef357ece3171eee35aabb777e75f9c156e301474651a741f6f540af7d7a365"
+  "visual_review": "All six final rendered pages inspected; figure captions, table order, future work and reference layout checked.",
+  "all_tables_and_figures_first_mentioned_before_display": true,
+  "figure_source_statements": "Both diagrams: Fuente: elaboración propia.",
+  "future_work_section_present": true,
+  "introduction_contribution_paragraph": "Cites conformance checking and runtime verification as foundations; identifies AgentArch as the contribution.",
+  "pdf_sha256": "8804ac20f0879c21f56f37e72b048b0dc4f9668982adbd459434b20a9e5c4891"
 }

@@ -62,4 +62,4 @@ La conformidad describe el cumplimiento de las reglas observadas. La finalizaci�
 
 ## Licencia y cita
 
-Licencia [MIT](LICENSE). Los metadatos para citar el artefacto están en [CITATION.cff](CITATION.cff). La edición editorial corresponde a `v0.7.0-editorial`; los registros experimentales conservan las versiones y configuraciones de sus ejecuciones originales.
+Licencia [MIT](LICENSE). Los metadatos para citar el artefacto están en [CITATION.cff](CITATION.cff). La edición editorial corresponde a `v0.7.1-editorial`; los registros experimentales conservan las versiones y configuraciones de sus ejecuciones originales.
