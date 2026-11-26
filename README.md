@@ -296,7 +296,35 @@ mantienen separados de los tres del estudio original y no se agrupan para
 estimar una tasa poblacional. La finalización de una consulta tampoco se compara
 como mejora sobre las tareas originales de reserva y pago.
 
+## Auditoría final y esquema general de consultas
+
+El lote tipado comprueba P1/P3 en 90 turnos, M3 en 90 lecturas vigentes y Π1/Π2
+en 90 llamadas restringidas por esquema. No contiene conflictos P2, escrituras
+del modelo M1, reemplazos M2 ni objetivos de precedencia Π3. Las treinta escrituras
+iniciales son del arnés. [El registro por operador](results/final_audit/typed_scope.json)
+delimita ese alcance sin atribuir cobertura de nueve infracciones a los cero FP.
+
+Se ejecutó además el [protocolo de esquema general](docs/final_audit_protocol.md)
+sobre las mismas treinta solicitudes y semillas, conservando todos los intentos.
+El esquema admite herramientas con nombre libre, argumentos no tipados por
+herramienta y escrituras, reservas o pagos, aunque la petición instruye a consultar.
+
+| Condición | Intentos | Válidas | Conformes | Con infracciones | FP | Completas |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Tipada | 30 | 30 | 30 | 0 | 0 | 30 |
+| Esquema general | 30 | 30 | 4 | 26 | 0 | 0 |
+
+Las cuatro conformes del esquema general también quedaron incompletas. El monitor
+coincidió en las 26 sesiones infractoras y B2 detectó 25. El contraste es descriptivo,
+con anotación automática, orquestación fija y diez plantillas: no se agrupan
+negativos ni se extrapolan tasas poblacionales. [Datos](results/free_queries/) y
+[comparación por plantilla](results/final_audit/query_interfaces.json).
+
 ## Supuestos y límites
+
+Esta versión se presenta como verificación interna realizada por los dos autores.
+La revisión humana conserva su alcance dirigido y no se atribuye a terceros.
+No se exige una validación externa para cerrar los resultados internos descritos.
 
 El 100 % de la suite guionizada describe la cobertura de los casos preparados.
 Las repeticiones y la comparación exploratoria con modelos pequeños limitan la generalización.
@@ -312,8 +340,9 @@ incorrecta puede ocultar M1. Se regenera con node experiments/instrumentation_se
 
 ## Versión y artículo
 
-La etiqueta v0.5.0-human-review incorpora los formularios recibidos y el lote
-prospectivo, y conserva v0.4.0-consolidated-review y las revisiones anteriores.
+La etiqueta v0.6.0-final-audit incorpora el lote con esquema general, explicita
+el alcance de las reglas tipadas y conserva las revisiones anteriores.
+a52165e fija el protocolo del esquema general antes de ejecutar.
 52eee33 fija el protocolo y ejecutor de consultas antes de inferir.
 cd6dc65 identifica benchmark_paths.js
 y el ejecutor y protocolo de la
@@ -327,7 +356,12 @@ documenta las referencias cuestionadas y la detección de MIT por GitHub.
 
 [El fuente IEEE](paper/articulo.tex) y [el PDF](paper/articulo.pdf) incorporan
 ambas evaluaciones, los límites del etiquetado automático y los resultados de
-tarea. Las correcciones actuales están documentadas en [el informe de revisión y consultas](docs/revision_humana_y_consultas.md).
+tarea. Los microbenchmarks y la sensibilidad a metadatos se mantienen como
+apéndices, para aligerar el cuerpo. El PDF incluye enlaces activos al
+[registro de fuentes](docs/verificacion_fuentes_consolidada.md) y al
+[índice de evidencias](docs/evidence_manifest.md), que enlaza formularios,
+SHA-256, licencia, protocolos y datos.
+Las correcciones actuales están documentadas en [la respuesta a la auditoría final](docs/respuesta_auditoria_final.md).
 
 ## 👥 Autores y Contacto
 

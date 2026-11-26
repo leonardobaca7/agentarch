@@ -1,0 +1,353 @@
+{
+  "protocolCommit": "a52165e1c0230e29a5425128301ee964a253afc9",
+  "rows": [
+    {
+      "condition": "Tipada",
+      "attempted": 30,
+      "valid": 30,
+      "conformant": 30,
+      "drift": 0,
+      "FP": 0,
+      "taskCompleted": 30,
+      "conformantIncomplete": 0
+    },
+    {
+      "condition": "Esquema general",
+      "attempted": 30,
+      "valid": 30,
+      "conformant": 4,
+      "drift": 26,
+      "FP": 0,
+      "taskCompleted": 0,
+      "conformantIncomplete": 4
+    }
+  ],
+  "byTemplate": [
+    {
+      "template": 1,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 0,
+      "drift": 3,
+      "completed": 0
+    },
+    {
+      "template": 2,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 1,
+      "drift": 2,
+      "completed": 0
+    },
+    {
+      "template": 3,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 0,
+      "drift": 3,
+      "completed": 0
+    },
+    {
+      "template": 4,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 1,
+      "drift": 2,
+      "completed": 0
+    },
+    {
+      "template": 5,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 1,
+      "drift": 2,
+      "completed": 0
+    },
+    {
+      "template": 6,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 1,
+      "drift": 2,
+      "completed": 0
+    },
+    {
+      "template": 7,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 0,
+      "drift": 3,
+      "completed": 0
+    },
+    {
+      "template": 8,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 0,
+      "drift": 3,
+      "completed": 0
+    },
+    {
+      "template": 9,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 0,
+      "drift": 3,
+      "completed": 0
+    },
+    {
+      "template": 10,
+      "planned": 3,
+      "valid": 3,
+      "conformant": 0,
+      "drift": 3,
+      "completed": 0
+    }
+  ],
+  "paired": [
+    {
+      "caseId": "Q01",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q02",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q03",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q04",
+      "typedConformant": true,
+      "freeConformant": true,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q05",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q06",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q07",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q08",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q09",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q10",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q11",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q12",
+      "typedConformant": true,
+      "freeConformant": true,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q13",
+      "typedConformant": true,
+      "freeConformant": true,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q14",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q15",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q16",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q17",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q18",
+      "typedConformant": true,
+      "freeConformant": true,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q19",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q20",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q21",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q22",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q23",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q24",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q25",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q26",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q27",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q28",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q29",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    },
+    {
+      "caseId": "Q30",
+      "typedConformant": true,
+      "freeConformant": false,
+      "typedTask": true,
+      "freeTask": false
+    }
+  ],
+  "errors": [],
+  "metrics": {
+    "B1": {
+      "TP": 0,
+      "FP": 0,
+      "TN": 4,
+      "FN": 26,
+      "precision": null,
+      "recall": 0,
+      "F1": 0,
+      "firstStepAccuracy": 0
+    },
+    "B2": {
+      "TP": 25,
+      "FP": 0,
+      "TN": 4,
+      "FN": 1,
+      "precision": 1,
+      "recall": 0.9615384615384616,
+      "F1": 0.9803921568627451,
+      "firstStepAccuracy": 0.6153846153846154
+    },
+    "AgentArch": {
+      "TP": 26,
+      "FP": 0,
+      "TN": 4,
+      "FN": 0,
+      "precision": 1,
+      "recall": 1,
+      "F1": 1,
+      "firstStepAccuracy": 1
+    }
+  },
+  "limitation": "Same domain, fixed roles, general JSON envelope, query instructions; automatic labels; descriptive comparison without population or causal inference"
+}

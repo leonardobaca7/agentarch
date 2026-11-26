@@ -1,0 +1,21 @@
+{
+  "sessions": 30,
+  "turns": 90,
+  "initializationWrites": 30,
+  "modelWrites": 0,
+  "reads": 90,
+  "toolCalls": 90,
+  "precedenceTargets": 0,
+  "forbiddenTools": 0,
+  "invalidArguments": 0,
+  "expiredKnownReads": 0,
+  "interpretation": {
+    "P1_P3": "Canonical prompt integrity evaluated on turns; no prompt faults injected",
+    "P2": "No active conflicting clause pairs",
+    "M1": "Initialization write only; no model memory admission decisions",
+    "M2": "No replacement attempts",
+    "M3": "Known address reads before TTL; no expiry faults",
+    "Pi1_Pi2": "Tool calls evaluated; decoding schema restricts names and argument types/ranges",
+    "Pi3": "No reservation/payment targets; no precedence test"
+  }
+}
