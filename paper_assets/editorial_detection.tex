@@ -1,0 +1,18 @@
+\begin{table*}[!t]
+\caption{Detección y localización del primer paso por conjunto}
+\label{tab:detection}
+\centering\footnotesize
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llrrrrr}
+\hline
+Conjunto & Variante & VP & FP & VN & FN & Primer paso\\
+\hline
+Guionizado & $B_1$ & 0 & 0 & 10 & 40 & 0/40\\
+ & $B_2$ & 10 & 0 & 10 & 30 & 10/40\\
+ & AgentArch & 40 & 0 & 10 & 0 & 40/40\\
+Pedidos, 0.6B & $B_1$ & 0 & 0 & 3 & 57 & 0/57\\
+ & $B_2$ & 33 & 0 & 3 & 24 & 13/57\\
+ & AgentArch & 57 & 0 & 3 & 0 & 57/57\\
+Consulta general & $B_1$ & 0 & 0 & 4 & 26 & 0/26\\
+ & $B_2$ & 25 & 0 & 4 & 1 & 16/26\\
+ & AgentArch & 26 & 0 & 4 & 0 & 26/26\\
+\hline\end{tabular*}\end{table*}

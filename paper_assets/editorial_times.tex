@@ -1,0 +1,19 @@
+\begin{table*}[!t]
+\caption{Tiempo por llamada ($\mu\mathrm{s}$): estadísticos de cien medias de lote}
+\label{tab:times}
+\centering\footnotesize
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}llrrrrrr}
+\hline
+Entrada & Camino & Media & DE & Mínimo & Mediana & p95 & p99\\
+\hline
+Turno & Conforme & 0.086 & 0.090 & 0.059 & 0.072 & 0.092 & 0.502\\
+Memoria & Conforme & 0.020 & 0.025 & 0.010 & 0.012 & 0.032 & 0.149\\
+Herramienta & Conforme & 0.439 & 0.104 & 0.348 & 0.416 & 0.606 & 0.899\\
+Turno & Con alerta & 0.191 & 0.183 & 0.120 & 0.144 & 0.528 & 1.150\\
+Memoria & Con alerta & 0.149 & 0.109 & 0.096 & 0.112 & 0.444 & 0.563\\
+Herramienta & Con alerta & 0.596 & 0.159 & 0.468 & 0.557 & 0.976 & 1.094\\
+Lectura & Conforme & 0.022 & 0.029 & 0.009 & 0.013 & 0.055 & 0.176\\
+Lectura & Con alerta & 0.246 & 0.255 & 0.112 & 0.148 & 0.652 & 1.354\\
+Adaptador turno & Conforme & 0.454 & 0.445 & 0.253 & 0.301 & 0.975 & 2.151\\
+Adaptador turno & Con alerta & 0.695 & 0.675 & 0.379 & 0.475 & 1.472 & 3.999\\
+\hline\end{tabular*}\end{table*}
